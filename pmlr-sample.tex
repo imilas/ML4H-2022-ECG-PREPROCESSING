@@ -1,0 +1,144 @@
+%%%% DON'T CHANGE %%%%%%%%%
+\documentclass[pmlr,twocolumn]{jmlr}% new name PMLR (Proceedings of Machine Learning Research)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   
+% The following packages will be automatically loaded:
+% amsmath, amssymb, natbib, graphicx, url, algorithm2e
+
+%%% WARNING %%%%
+%%% 1) Please, use the packages automatically loaded to manage references, write equations, and include figures and algorithms. The use of different packages could create problems in the generation of the camera-ready version. Please, follow the examples provided in this file.
+%%% 2) References must be included in a .bib file.
+%%% 3) Write your paper in a single .tex file.
+%%%
+
+%%%% SOFTWARE %%%%
+%%% Many papers have associated code provided. If that is your case, include a link to the code in the paper as usual and provide a link to the code in the following comment too. We will use the link in the next comment when we generate the proceedings.
+%%% Link to code: http://?? (only for camera ready)
+
+ %\usepackage{rotating}% for sideways figures and tables
+\usepackage{longtable}% for long tables
+
+ % The booktabs package is used by this sample document
+ % (it provides \toprule, \midrule and \bottomrule).
+ % Remove the next line if you don't require it.
+\usepackage{booktabs}
+ % The siunitx package is used by this sample document
+ % to align numbers in a column by their decimal point.
+ % Remove the next line if you don't require it.
+\usepackage[load-configurations=version-1]{siunitx} % newer version
+ %\usepackage{siunitx}
+
+ % The following command is just for this sample document:
+\newcommand{\cs}[1]{\texttt{\char`\\#1}}
+
+ % Define an unnumbered theorem just for this sample document:
+\theorembodyfont{\upshape}
+\theoremheaderfont{\scshape}
+\theorempostheader{:}
+\theoremsep{\newline}
+\newtheorem*{note}{Note}
+
+%%%% DON'T CHANGE %%%%%%%%%
+\jmlrvolume{1}
+\firstpageno{1}
+\editors{List of editors' names}
+
+\jmlryear{2022}
+\jmlrworkshop{Machine Learning for Health (ML4H) 2022}
+
+%\editor{Editor's name}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title[ECG Scaling]{~Full Title of Article \titlebreak This Title Has
+A Line Break}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THE MANUSCRIPT, DATA AND CODE MUST BE ANONYMIZED DURING THE REVIEW PROCESS. 
+% DON'T INCLUDE ANY INFORMATION ABOUT AUTHORS DURING THE REVIEW PROCESS.
+% Information about authors (Full names, emails, affiliations) have to be provided only for the submission of the camera-ready version.  Only in that case, you can uncomment and use the next blocks.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ % Use \Name{Author Name} to specify the name.
+
+ % Spaces are used to separate forenames from the surname so that
+ % the surnames can be picked up for the page header and copyright footer.
+ 
+ % If the surname contains spaces, enclose the surname
+ % in braces, e.g. \Name{John {Smith Jones}} similarly
+ % if the name has a "von" part, e.g \Name{Jane {de Winter}}.
+ % If the first letter in the forenames is a diacritic
+ % enclose the diacritic in braces, e.g. \Name{{\'E}louise Smith}
+
+ % *** Make sure there's no spurious space before \nametag ***
+
+
+  %Three or more authors with the same address:
+\author{\Name{Amir Salimi} \Email{{asalimi@ualberta.ca}\\
+\Name{Abram Hindle} \Email{abram.hindle@ualberta.ca}\\
+\Name{Osmar Zaiane} \Email{zaiane@ualberta.ca}\\
+\addr University of Alberta}}
+
+
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Are there any best practices when it comes to pre-processing of Electrocardiogram (ECG) signals for automatic diagnosis of heart disease? 
+State of the art machine learning algorithms have achieved remarkable results by learning from multi-lead ECG signals, yet rarely is the pre-processing decisions for training these models justified or the effect of their absence measured. Understandably, discerning such rules is difficult since different datasets, diseases, and model architectures may require different pre-processing steps for optimal performance; in addition, the sheer number of methods and parameters which need to be explored can be overwhelming. We have created an open-source project where different multi-label ECG datasets can be pre-processed using commonly utilized signal processing techniques and learned from by state of the art deep-learning classifiers. As our first investigation with this framework, we apply various down-sampling rates to 3 ECG datasets and measure the effect on the performance of 3 multi-label classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. 
+
+\end{abstract}
+\begin{keywords}
+electrocardiogram, machine learning, signal processing
+\end{keywords}
+
+
+\section{Introduction}
+% ecgs are used to diagnose heart conditions
+% pre-processing functions can affect model accuracy and training complexity
+% We wrote a project where we can test out pre-processing functions
+% we ran an experiment on downsampling of ECGs, is the typical 500hz necessary?
+\label{sec:intro}
+There is an overwhelming and ever-growing number of tools and approaches available for machine learning. This often requires a number of a priori guesses to be made by those who process data and train models for machine learning tasks. In this work, we focus such decisions, particularly in the field of automatic classification of cardiovascular conditions using Electrocardiograms. 
+An Electrocardiogram (ECG) is a recording of the electrical activity of the cardiovascular system. ECGs are routinely utilized by clinicians for diagnoses of cardiovascular abnormalities. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
+
+
+In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions used thus far in previous works. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Here, previous works do not help with narrowing the decision making process, as many of these choices stem from the diverse range of pre-processing functions, datasets, and architectures used by past research, often with great results~\cite{hong2022practical}. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
+
+
+In this work we aim to simplify this decision space for other researchers in two ways: 
+\begin{enumerate}
+    \item Our codebase, which can be used to load different multi-label ECG datasets, pre-process them in an online manner using various commonly used functions, and create classification models using various state of the art~\textbf{(SOTA)} machine learning architectures. We have taken a modular approach to ensure that other models, datasets, and pre-processing functions can be added with relative ease. We describe our code base in more detail in Section~\ref{sec:software}.
+    \item By using our code to test the effect of~\textit{down-sampling} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that downsampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.
+\end{enumerate}
+
+\section{Previous Work}
+% physionet and metaphysionet?
+\label{sec:prevwork}
+
+\section{Software}
+% what it can do
+% download and process physionet data for memap arrays
+% models provided by tsai
+% dataloaders provided by fast_ai which uses pytorch as backend
+% we added pre-processing functions on top of tsai's functions
+% there are two types of pre-processing functions:
+% those which are applied to both training and testing data
+% those which are only applied during training (for augmentation)
+% a script which runs experiments
+% a script which analyses experiments?
+\label{sec:software}
+
+
+\section{Scaling Experiments}
+\label{sec:experiment}
+\subsection{Datasets}
+
+
+\bibliography{pmlr-sample}
+
+
+
+\end{document}
