@@ -49,8 +49,7 @@
 %\editor{Editor's name}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title[ECG Scaling]{~Full Title of Article \titlebreak This Title Has
-A Line Break}
+\title[ECG Scaling]{Exploring Best Practices for ECG Pre-Processing in Machine Learning}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % THE MANUSCRIPT, DATA AND CODE MUST BE ANONYMIZED DURING THE REVIEW PROCESS. 
@@ -76,18 +75,20 @@ A Line Break}
 \author{\Name{Amir Salimi} \Email{{asalimi@ualberta.ca}\\
 \Name{Abram Hindle} \Email{abram.hindle@ualberta.ca}\\
 \Name{Osmar Zaiane} \Email{zaiane@ualberta.ca}\\
+\Name{others} \Email{CVC@ualberta.ca}\\
 \addr University of Alberta}}
 
 
 
-
+% added packages
+\usepackage{xcolor} %just for notes
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
 Are there any best practices when it comes to pre-processing of Electrocardiogram (ECG) signals for automatic diagnosis of heart disease? 
-State of the art machine learning algorithms have achieved remarkable results by learning from multi-lead ECG signals, yet rarely is the pre-processing decisions for training these models justified or the effect of their absence measured. Understandably, discerning such rules is difficult since different datasets, diseases, and model architectures may require different pre-processing steps for optimal performance; in addition, the sheer number of methods and parameters which need to be explored can be overwhelming. We have created an open-source project where different multi-label ECG datasets can be pre-processed using commonly utilized signal processing techniques and learned from by state of the art deep-learning classifiers. As our first investigation with this framework, we apply various down-sampling rates to 3 ECG datasets and measure the effect on the performance of 3 multi-label classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. 
+State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on best practices for pre-processing of ECGs.  This lack of best practices could be due to different datasets, diseases, and model architectures requiring different pre-processing steps for optimal performance, or perhaps deep-learning models have rendered such pre-processing methods unnecessary. In this work we apply down-sampling, normalization, and filtering functions to 3 different multi-label ECG, and measure their effects on 3 different state of the art time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. (findings of normalization and filtering are pending)
 
 \end{abstract}
 \begin{keywords}
@@ -111,12 +112,137 @@ In order to automatically classify cardiovascular conditions using ECG data, we 
 In this work we aim to simplify this decision space for other researchers in two ways: 
 \begin{enumerate}
     \item Our codebase, which can be used to load different multi-label ECG datasets, pre-process them in an online manner using various commonly used functions, and create classification models using various state of the art~\textbf{(SOTA)} machine learning architectures. We have taken a modular approach to ensure that other models, datasets, and pre-processing functions can be added with relative ease. We describe our code base in more detail in Section~\ref{sec:software}.
-    \item By using our code to test the effect of~\textit{down-sampling} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that downsampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.
+    \item By using our code to test the effect of~\textit{down-sampling} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.
 \end{enumerate}
+
+
+
 
 \section{Previous Work}
 % physionet and metaphysionet?
 \label{sec:prevwork}
+
+
+\section{Datasets}
+\label{datasets}
+
+We conduct our experiments on three datasets, the~\textbf{CPSC} dataset~\cite{liu2018open}, \textbf{Chapman-Shaoxing} dataset~\cite{zheng202012}, and ~\textbf{PTB-XL}~\cite{wagner2020ptb}. The datasets are all multi-label, and recorded at the sampling rate of 500Hz. All have been released as part of the 8 datasets of labeled 12-lead ECGs provided by the Physionet\-2021 challenge~\cite{reyna2021will,reyna4issues}.
+To simplify our datasets and experiments, we only use the labels which appear in more than 5\% of the ECGs in each dataset. Here we only use 10 seconds of data from each ECG. ECGs shorter than this length are padded with zeros (on the left side), such that we can represent each ECG as a matrix with dimensions of 12x5000 (before down-sampling).
+The breakdown of these datasets and their label counts after our modifications are given in Tables~\ref{tab:cpsc},~\ref{tab:chapman}, and~\ref{tab:ptb}.
+\begin{table}[tbp]
+ % The first argument is the label.
+ % The caption goes in the second argument, and the table contents
+ % go in the third argument.
+\floatconts
+  {tab:cpsc}%
+  {\caption{Modified CPSC Dataset}}%
+  {
+\begin{tabular}{|c|c|}
+ \hline
+Label & Count \\
+ \hline
+right bundle branch block    &  1857 \\
+ventricular ectopics         &   700 \\
+atrial fibrillation          &  1221 \\
+left bundle branch block     &   236 \\
+st elevation                 &   220 \\
+1st degree av block          &   722 \\
+premature atrial contraction &   616 \\
+sinus rhythm                 &   918 \\
+st depression                &   869 \\
+ \hline
+\textbf{Total} & \textbf{6903}\\
+\hline
+\end{tabular}
+  }
+\end{table}
+
+\begin{table}[tbp]
+ % The first argument is the label.
+ % The caption goes in the second argument, and the table contents
+ % go in the third argument.
+\floatconts
+  {tab:chapman}%
+  {\caption{Modified Chapman Dataset}}%
+  {
+    \begin{tabular}{|c|c|}
+     \hline
+    Label & Count \\
+     \hline
+    left ventricular high voltage &  1295 \\
+    atrial fibrillation           &  1780 \\
+    t wave abnormal               &  1876 \\
+    sinus bradycardia             &  3889 \\
+    supraventricular tachycardia  &   587 \\
+    sinus rhythm                  &  1826 \\
+    sinus tachycardia             &  1568 \\
+    nonspecific st t abnormality  &  1158 \\
+     \hline
+    \textbf{Total} & \textbf{9910}\\
+    \hline
+    \end{tabular}
+  }
+\end{table}
+
+\begin{itemize}
+    \item \textbf{CPSC} is an open access  dataset released in 2018 as part a multi-label ECG classification competition~\cite{liu2018open} and used in SOTA benchmarks~\cite{strodthoff2020deep}. ECG signal duration in this dataset is between 6 and 60 seconds, with an average duration of 15.79 seconds. The the 12 leads were recorded at the frequency of 500 Hz, and each ECG can have up to 9 labels.
+    \item \textbf{Chapman-Shaoxing} is an open access dataset which has not been subject to many benchmarks. This dataset contains 12-lead ECGs of 10,646 patients with a 500 Hz sampling rate and 54 labels~\cite{zheng202012}.
+    \item \textbf{PTB-XL} is an open access dataset, used in recent benchmarks~\cite{strodthoff2020deep}. This dataset contains 12-lead ECGs of 21,837 ECGs with a 500 Hz sampling rate~\cite{zheng202012}. This dataset has 54 labels, however we only use 11 of the most common labels. 
+\end{itemize}
+% do i cite this? results are bad but more recent: https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-021-01546-2
+
+
+
+\begin{table}[tbp]
+ % The first argument is the label.
+ % The caption goes in the second argument, and the table contents
+ % go in the third argument.
+\floatconts
+  {tab:ptb}%
+  {\caption{Modified PTB-XL}}%
+  {
+    \begin{tabular}{|c|c|}
+     \hline
+    Label & Count \\
+     \hline
+        left axis deviation                  &   5146 \\
+        myocardial ischemia                  &   2175 \\
+        myocardial infarction                &   5261 \\
+        left ventricular hypertrophy         &   2359 \\
+        ventricular ectopics                 &   1154 \\
+        atrial fibrillation                  &   1514 \\
+        t wave abnormal                      &   2345 \\
+        abnormal QRS                         &   3389 \\
+        sinus rhythm                         &  18092 \\
+        left anterior fascicular block       &   1626 \\
+        incomplete rbbb &   1118 \\
+     \hline
+    \textbf{Total} & \textbf{21311}\\
+    \hline
+    \end{tabular}
+  }
+\end{table}
+
+
+
+
+% \begin{table*}[htbp]
+
+% \label{tab:top5}
+% {\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
+% {   
+%     \begin{tabular}{|c|c|c|c|c|c|}
+%     \hline
+%     Rank & Group                                          & Scaling                   & Normalize            & BandPass                  & Shifting                  \\ \hline
+%     1    & A Wide \& Deep Transformer                     &                           & \checkmark & \checkmark &                           \\ \hline
+%     2    & Adaptive lead weighted ResNet                  & \checkmark & \checkmark &                           &                           \\ \hline
+%     3    & Classification of Cardiac Abnormalities        &                           &                           &                           &                           \\ \hline
+%     4    & Combining Scatter Transform and DL             &                           & \checkmark &                           & \checkmark \\ \hline
+%     5    & Adversarial Multi-Source Domain Generalization &                           &                           & \checkmark &                           \\ \hline
+%     \end{tabular}
+% }
+
+% \end{table*}
 
 \section{Software}
 % what it can do
@@ -130,11 +256,24 @@ In this work we aim to simplify this decision space for other researchers in two
 % a script which runs experiments
 % a script which analyses experiments?
 \label{sec:software}
+\section{Models}
+\label{sec:models}
+{\color{red} incomplete}\\
+We use three models with proven results in state of the art time-series classification tasks: the Inception-Time Network, which is the 1-dimensional application of the Inception-Network~\cite{szegedy2017inception,ismail2020inceptiontime} and MiniRocket, a quick and mostly deterministic feature extractor for time-series~\cite{dempster2021minirocket}. A recent survey of time-series classification methods by Ruiz~\textit{et al.} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In the context of ECG classification, Inception-Time has achieved state of the art performance ECG classification tasks~\cite{Strodthoff2021}.
 
-
-\section{Scaling Experiments}
+\section{Experiments}
 \label{sec:experiment}
-\subsection{Datasets}
+Using the three datasets and three models discussed in Sections~\ref{datasets} and~\ref{sec:models}, we experiment with three common pre-processing functions. As discussed previously, some SOTA classifiers have used one or more of these functions, while others have omitted them entirely~\cite{ribeiro2020automatic}. The goal here is to see if we can find consistent results when applying these functions to different models and datasets. These are:
+\begin{itemize}
+    \item Scaling/Down-sampling
+    \item Normalizing
+    \item Bandpass Filtering
+\end{itemize}
+
+\section{Scaling}
+\label{sec:scaling}
+
+
 
 
 \bibliography{pmlr-sample}
