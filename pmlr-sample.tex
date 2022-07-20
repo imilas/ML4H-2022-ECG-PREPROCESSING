@@ -144,8 +144,6 @@ Label & Count \\
 right bundle branch block    &  1857 \\
 ventricular ectopics         &   700 \\
 atrial fibrillation          &  1221 \\
-left bundle branch block     &   236 \\
-st elevation                 &   220 \\
 1st degree av block          &   722 \\
 premature atrial contraction &   616 \\
 sinus rhythm                 &   918 \\
@@ -225,24 +223,25 @@ st depression                &   869 \\
 
 
 
+\begin{table*}[htbp]
+\label{tab:top5}
+{\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
+    
+    { 
+    \resizebox{1 \textwidth}{!}{
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    Rank & Group                                          & Scaling                   & Normalize            & BandPass                  & Shifting                  \\ \hline
+    1    & A Wide \& Deep Transformer                     &                           & \checkmark & \checkmark &                           \\ \hline
+    2    & Adaptive lead weighted ResNet                  & \checkmark & \checkmark &                           &                           \\ \hline
+    3    & Classification of Cardiac Abnormalities        &                           &                           &                           &                           \\ \hline
+    4    & Combining Scatter Transform and DL             &                           & \checkmark &                           & \checkmark \\ \hline
+    5    & Adversarial Multi-Source Domain Generalization &                           &                           & \checkmark &                           \\ \hline
+    \end{tabular}
+    }
+}
 
-% \begin{table*}[htbp]
-
-% \label{tab:top5}
-% {\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
-% {   
-%     \begin{tabular}{|c|c|c|c|c|c|}
-%     \hline
-%     Rank & Group                                          & Scaling                   & Normalize            & BandPass                  & Shifting                  \\ \hline
-%     1    & A Wide \& Deep Transformer                     &                           & \checkmark & \checkmark &                           \\ \hline
-%     2    & Adaptive lead weighted ResNet                  & \checkmark & \checkmark &                           &                           \\ \hline
-%     3    & Classification of Cardiac Abnormalities        &                           &                           &                           &                           \\ \hline
-%     4    & Combining Scatter Transform and DL             &                           & \checkmark &                           & \checkmark \\ \hline
-%     5    & Adversarial Multi-Source Domain Generalization &                           &                           & \checkmark &                           \\ \hline
-%     \end{tabular}
-% }
-
-% \end{table*}
+\end{table*}
 
 \section{Software}
 % what it can do
@@ -263,6 +262,7 @@ We use three models with proven results in state of the art time-series classifi
 
 \section{Experiments}
 \label{sec:experiment}
+{\color{red} incomplete}\\
 Using the three datasets and three models discussed in Sections~\ref{datasets} and~\ref{sec:models}, we experiment with three common pre-processing functions. As discussed previously, some SOTA classifiers have used one or more of these functions, while others have omitted them entirely~\cite{ribeiro2020automatic}. The goal here is to see if we can find consistent results when applying these functions to different models and datasets. These are:
 \begin{itemize}
     \item Scaling/Down-sampling
@@ -270,14 +270,57 @@ Using the three datasets and three models discussed in Sections~\ref{datasets} a
     \item Bandpass Filtering
 \end{itemize}
 
+
 \section{Scaling}
+The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different versions, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. We run this training/testing step 20 times, and record the F1 measure of the best model for all labels. We use the wilcox-holm post-hoc analysis used for creating critical-difference diagrams by ~\cite{IsmailFawaz2018deep} to get the average ranking for each model, as well as whether the differences between each model pairs is significant. 
+
+
+
 \label{sec:scaling}
 
 
+\section{First Appendix}\label{apd:first}
 
 
 \bibliography{pmlr-sample}
+\section{Appendix A: Performance Per-Disease For each Dataset}\label{apd:first}
 
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Example Image}}
+  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_cpsc.pdf}}
+\end{figure*}
+
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Example Image}}
+  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_chapmanShaoxing.pdf}}
+\end{figure*}
+
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Example Image}}
+  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_PTBXL.pdf}}
+\end{figure*}
+
+\section{Second Appendix}\label{apd:second}
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Example Image}}
+  {\includegraphics[width=1\linewidth]{images/model_comparisons_alldatasets.pdf}}
+\end{figure*}
 
 
 \end{document}
