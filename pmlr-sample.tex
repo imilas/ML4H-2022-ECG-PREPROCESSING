@@ -112,17 +112,37 @@ In order to automatically classify cardiovascular conditions using ECG data, we 
 In this work we aim to simplify this decision space for other researchers in two ways: 
 \begin{enumerate}
     \item Our codebase, which can be used to load different multi-label ECG datasets, pre-process them in an online manner using various commonly used functions, and create classification models using various state of the art~\textbf{(SOTA)} machine learning architectures. We have taken a modular approach to ensure that other models, datasets, and pre-processing functions can be added with relative ease. We describe our code base in more detail in Section~\ref{sec:software}.
-    \item By using our code to test the effect of~\textit{down-sampling} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.
+    \item By using our code to test the effect of~\textit{down-sampling},~\textit{normalizing}, and~\textit{band-passing}on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.
 \end{enumerate}
 
 
 
 
+
+\begin{table*}[tbp]
+\label{tab:top5}
+{\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
+    
+    { 
+    \resizebox{1 \textwidth}{!}{
+    \begin{tabular}{|c|c|c|c|c|c|}
+    \hline
+    Rank & Group                                          & Scaling                   & Normalize            & BandPass                  & Shifting                  \\ \hline
+    1    & A Wide \& Deep Transformer                     &                           & \checkmark & \checkmark &                           \\ \hline
+    2    & Adaptive lead weighted ResNet                  & \checkmark & \checkmark &                           &                           \\ \hline
+    3    & Classification of Cardiac Abnormalities        &                           &                           &                           &                           \\ \hline
+    4    & Combining Scatter Transform and DL             &                           & \checkmark &                           & \checkmark \\ \hline
+    5    & Adversarial Multi-Source Domain Generalization &                           &                           & \checkmark &                           \\ \hline
+    \end{tabular}
+    }
+}
+
+\end{table*}
 \section{Previous Work}
 % physionet and metaphysionet?
 \label{sec:prevwork}
-
-
+{\color{red} incomplete}\\
+Mainly discuss on physionet and metaphysionet (Table~\ref{tab:top5}). Other works like~\cite{ribeiro2020automatic} and CVC works can be talked about. 
 \section{Datasets}
 \label{datasets}
 
@@ -223,26 +243,6 @@ st depression                &   869 \\
 
 
 
-\begin{table*}[htbp]
-\label{tab:top5}
-{\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
-    
-    { 
-    \resizebox{1 \textwidth}{!}{
-    \begin{tabular}{|c|c|c|c|c|c|}
-    \hline
-    Rank & Group                                          & Scaling                   & Normalize            & BandPass                  & Shifting                  \\ \hline
-    1    & A Wide \& Deep Transformer                     &                           & \checkmark & \checkmark &                           \\ \hline
-    2    & Adaptive lead weighted ResNet                  & \checkmark & \checkmark &                           &                           \\ \hline
-    3    & Classification of Cardiac Abnormalities        &                           &                           &                           &                           \\ \hline
-    4    & Combining Scatter Transform and DL             &                           & \checkmark &                           & \checkmark \\ \hline
-    5    & Adversarial Multi-Source Domain Generalization &                           &                           & \checkmark &                           \\ \hline
-    \end{tabular}
-    }
-}
-
-\end{table*}
-
 \section{Software}
 % what it can do
 % download and process physionet data for memap arrays
@@ -259,7 +259,14 @@ st depression                &   869 \\
 \label{sec:models}
 {\color{red} incomplete}\\
 We use three models with proven results in state of the art time-series classification tasks: the Inception-Time Network, which is the 1-dimensional application of the Inception-Network~\cite{szegedy2017inception,ismail2020inceptiontime} and MiniRocket, a quick and mostly deterministic feature extractor for time-series~\cite{dempster2021minirocket}. A recent survey of time-series classification methods by Ruiz~\textit{et al.} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In the context of ECG classification, Inception-Time has achieved state of the art performance ECG classification tasks~\cite{Strodthoff2021}.
-
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:scaling_results_per_disease}
+  {\caption{Performance of the models for each dataset and disease at varying scaling rates. The 15 models are ranked against each other, and the lower the ranking the better the model performed. }}
+  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_all.pdf}}
+\end{figure*}
 \section{Experiments}
 \label{sec:experiment}
 {\color{red} incomplete}\\
@@ -272,55 +279,54 @@ Using the three datasets and three models discussed in Sections~\ref{datasets} a
 
 
 \section{Scaling}
-The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different versions, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. We run this training/testing step 20 times, and record the F1 measure of the best model for all labels. We use the wilcox-holm post-hoc analysis used for creating critical-difference diagrams by ~\cite{IsmailFawaz2018deep} to get the average ranking for each model, as well as whether the differences between each model pairs is significant. 
-
-
-
 \label{sec:scaling}
+The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different versions, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. We run this training/testing step 20 times, and record the F1 measure of the best model for all labels. We use the wilcox-holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep} to get the average ranking for each model, as well as whether the differences between each model pairs is significant. These results are shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. In Sinus Rythm, also common in all 3 datasets, the inception network with lowest possible sampling rate clearly out-performs. {\color{red} do we highlight all visible patterns here?}\\
 
-
-\section{First Appendix}\label{apd:first}
+Readers interested in comparisons of the 3 models under different scaling conditions can see Appendix~\ref{apd:model_vs_model}. 
 
 
 \bibliography{pmlr-sample}
-\section{Appendix A: Performance Per-Disease For each Dataset}\label{apd:first}
 
+\appendix
+\section{First Appendix}\label{apd:model_vs_model}
 \begin{figure*}[tbp]
  % Caption and label go in the first argument and the figure contents
  % go in the second argument
 \floatconts
   {fig:image}
-  {\caption{Example Image}}
-  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_cpsc.pdf}}
-\end{figure*}
-
-\begin{figure*}[tbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Example Image}}
-  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_chapmanShaoxing.pdf}}
-\end{figure*}
-
-\begin{figure*}[tbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Example Image}}
-  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_PTBXL.pdf}}
-\end{figure*}
-
-\section{Second Appendix}\label{apd:second}
-\begin{figure*}[tbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Example Image}}
+  {\caption{Model performance comparison for all datasets}}
   {\includegraphics[width=1\linewidth]{images/model_comparisons_alldatasets.pdf}}
+ 
 \end{figure*}
 
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Model performance comparison for CPSC}}
+  {\includegraphics[width=1\linewidth]{images/model_comparisons_CPSC2018.pdf}}
+ 
+\end{figure*}
+
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Model performance comparison for Chapman}}
+  {\includegraphics[width=1\linewidth]{images/model_comparisons_ChapmanShaoxing.pdf}}
+ 
+\end{figure*}
+
+\begin{figure*}[tbp]
+ % Caption and label go in the first argument and the figure contents
+ % go in the second argument
+\floatconts
+  {fig:image}
+  {\caption{Model performance comparison for PTBXL}}
+  {\includegraphics[width=1\linewidth]{images/model_comparisons_PTBXL.pdf}}
+ 
+\end{figure*}
 
 \end{document}
