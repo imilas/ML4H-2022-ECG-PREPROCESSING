@@ -87,8 +87,8 @@
 \maketitle
 
 \begin{abstract}
-Are there any best practices when it comes to pre-processing of Electrocardiogram (ECG) signals for automatic diagnosis of heart disease? 
-State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on best practices for pre-processing of ECGs.  This lack of best practices could be due to different datasets, diseases, and model architectures requiring different pre-processing steps for optimal performance, or perhaps deep-learning models have rendered such pre-processing methods unnecessary. In this work we apply down-sampling, normalization, and filtering functions to 3 different multi-label ECG, and measure their effects on 3 different state of the art time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. (findings of normalization and filtering are pending)
+Are there any best practices for pre-processing of Electrocardiogram (ECG) signals for automatic diagnosis of heart disease? 
+State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on how ECGs should be pre-processed.  Is this lack of consensus due to different diseases and model architectures requiring different pre-processing steps for optimal performance? Is it possible that state-of-the-art deep-learning models have rendered such pre-processing methods unnecessary? In this work we apply down-sampling, normalization, and filtering functions to 3 different multi-label ECG datasets and measure their effects on 3 different SOTA time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. (findings of normalization and filtering are pending)
 
 \end{abstract}
 \begin{keywords}
@@ -102,20 +102,14 @@ electrocardiogram, machine learning, signal processing
 % We wrote a project where we can test out pre-processing functions
 % we ran an experiment on downsampling of ECGs, is the typical 500hz necessary?
 \label{sec:intro}
-There is an overwhelming and ever-growing number of tools and approaches available for machine learning. This often requires a number of a priori guesses to be made by those who process data and train models for machine learning tasks. In this work, we focus such decisions, particularly in the field of automatic classification of cardiovascular conditions using Electrocardiograms. 
+In this work, we focus on data pre-processing decisions faced by researchers in the field of automatic classification of cardiovascular conditions using Electrocardiograms. The ever-growing number of tools and approaches available for machine learning often requires a number of a priori guesses to be made by those who process data and train models for machine learning tasks.
 An Electrocardiogram (ECG) is a recording of the electrical activity of the cardiovascular system. ECGs are routinely utilized by clinicians for diagnoses of cardiovascular abnormalities. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
 
 
-In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions used thus far in previous works. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Here, previous works do not help with narrowing the decision making process, as many of these choices stem from the diverse range of pre-processing functions, datasets, and architectures used by past research, often with great results~\cite{hong2022practical}. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
+In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions, due to the variety of implementations in previous works. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\cite{hong2022practical}. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
 
 
-In this work we aim to simplify this decision space for other researchers in two ways: 
-\begin{enumerate}
-    \item Our codebase, which can be used to load different multi-label ECG datasets, pre-process them in an online manner using various commonly used functions, and create classification models using various state of the art~\textbf{(SOTA)} machine learning architectures. We have taken a modular approach to ensure that other models, datasets, and pre-processing functions can be added with relative ease. We describe our code base in more detail in Section~\ref{sec:software}.
-    \item By using our code to test the effect of~\textit{down-sampling},~\textit{normalizing}, and~\textit{band-passing}on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.
-\end{enumerate}
-
-
+In this work we aim to simplify this decision space for other researchers by using our code to test the effect of \textit{down-sampling}, \textit{band-passing}, and \textit{normalizing} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.  {\color{red} will also include quick summary of bandpassing and normalizing results}\\
 
 
 
@@ -125,24 +119,34 @@ In this work we aim to simplify this decision space for other researchers in two
     
     { 
     \resizebox{1 \textwidth}{!}{
-    \begin{tabular}{|c|c|c|c|c|c|}
+    \begin{tabular}{|c|c|c|c|c|}
     \hline
-    Rank & Group                                          & Scaling                   & Normalize            & BandPass                  & Shifting                  \\ \hline
-    1    & A Wide \& Deep Transformer                     &                           & \checkmark & \checkmark &                           \\ \hline
-    2    & Adaptive lead weighted ResNet                  & \checkmark & \checkmark &                           &                           \\ \hline
-    3    & Classification of Cardiac Abnormalities        &                           &                           &                           &                           \\ \hline
-    4    & Combining Scatter Transform and DL             &                           & \checkmark &                           & \checkmark \\ \hline
-    5    & Adversarial Multi-Source Domain Generalization &                           &                           & \checkmark &                           \\ \hline
+    Rank & Group                                          & Scaling                   & Normalize            & BandPass                  \\ \hline
+    1    & Wide and Deep Transformer~\cite{natarajan2020wide}                   &                           & \checkmark & \checkmark \\ \hline
+    2    & Adaptive ResNet~\cite{zhao2020adaptive}                  & \checkmark & \checkmark & \\ \hline
+    3    & SE-ResNet~\cite{zhu2020classification}        &                           &                           &                           \\ \hline
+    4    & Scatter Transform and DNNs ~\cite{oppelt2020combining}             &                           & \checkmark &                           \\ \hline
+    5    & Adversarial Domain Generalization~\cite{hasani2020classification}&                           &                           & \checkmark \\ \hline
     \end{tabular}
     }
 }
 
 \end{table*}
 \section{Previous Work}
+{\color{red} needs: works which used the pre-processing methods in question}\\
 % physionet and metaphysionet?
 \label{sec:prevwork}
-{\color{red} incomplete}\\
-Mainly discuss on physionet and metaphysionet (Table~\ref{tab:top5}). Other works like~\cite{ribeiro2020automatic} and CVC works can be talked about. 
+The state of the art for the automatic classification of cardio-vascular disease continually improves as more data sets become available and computation costs decrease. However, no consensus seems to exist on the best pre-processing steps for such datasets. Here, we define pre-processing as ``any function which aims to simplify or transform the data in-order to simplify the learning process". \cite{hong2022practical} highlight 4 different popular pre-processing methods for ECG signals, based on their analysis of the entries to the Physionet2020 Challange~\cite{goldberger2000physiobank,alday2020classification}:
+\begin{itemize}
+    \item Resizing: Since signals are time-series, they can vary in length. Resizing refers to fixing the length of the signals before they are given to models. In this work, we do not explore various approaches to resizing, rather, we pad samples with zeros on the right when lower than our desired fixed length. 
+    \item Resampling (down-sampling): ECGs are typically sampled at the rate of 500Hz~\cite{luo2010review,uwaechia2021comprehensive}, meaning that each second of an ECG recording contains 500 samples. The act of down-sampling an ECG is akin to resolution reduction of an image. This can drastically lower training times and hardware requirements, yet it is possible that important information could be lost. In this works we explore the effect of different down-sampling (or scaling) rates on the performance of ML models. We discuss our findings in Section~\ref{sec:scaling}. 
+    \item Band-Passing: A band-pass filter is used for the removal of frequencies outside of its two cut-offs. All frequencies below the high-pass cut-off and above the low-pass cut-off are removed or reduced. This can improve performance as noise can interfere with the learning process. In this work we compare the use of different cut-offs as well as the case when no filtering was applied to the dataset. The results are shown in Section~\ref{sec:BandPass}.
+    \item Normalizing: Normalization of input values has been shown to produce better or equal value results in image and time-series classification~\cite{bhanja2018impact}. Particularly in the case of ECGs, there can be differences in recorded amplitudes depending on the equipment used~\cite{uwaechia2021comprehensive}, making normalization a logical step in pre-processing. Here we compare 3 different normalization algorithms proposed by previous works as well as the case when no normalization was applied. We show the results in Section~\ref{sec:Norm}
+\end{itemize}
+
+There is also great variety in the architectures used to learn from ECG datasets, or time-series data more generally. Here, we use three models with proven results in state of the art time-series classification tasks: the Inception-Time Network, which is the 1-dimensional application of the Inception-Network~\cite{szegedy2017inception,ismail2020inceptiontime} and MiniRocket, a quick and mostly deterministic feature extractor for time-series~\cite{dempster2021minirocket}. A recent survey of time-series classification methods by~\cite{ruiz2021great} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In the context of ECG classification, Inception-Time has achieved state of the art performance ECG classification tasks~\cite{Strodthoff2021}. The third architecture tested here is xresnet1d101, a resnet model for time-series which was found to be the overall best performer in a benchmark study of best architectures for classification of ECGs~\cite{strodthoff2020deep} .
+% Mainly discuss on physionet and metaphysionet (Table~\ref{tab:top5}). Other works like~\cite{ribeiro2020automatic} and CVC works can be talked about. 
+
 \section{Datasets}
 \label{datasets}
 
@@ -205,7 +209,7 @@ st depression                &   869 \\
 \begin{itemize}
     \item \textbf{CPSC} is an open access  dataset released in 2018 as part a multi-label ECG classification competition~\cite{liu2018open} and used in SOTA benchmarks~\cite{strodthoff2020deep}. ECG signal duration in this dataset is between 6 and 60 seconds, with an average duration of 15.79 seconds. The the 12 leads were recorded at the frequency of 500 Hz, and each ECG can have up to 9 labels.
     \item \textbf{Chapman-Shaoxing} is an open access dataset which has not been subject to many benchmarks. This dataset contains 12-lead ECGs of 10,646 patients with a 500 Hz sampling rate and 54 labels~\cite{zheng202012}.
-    \item \textbf{PTB-XL} is an open access dataset, used in recent benchmarks~\cite{strodthoff2020deep}. This dataset contains 12-lead ECGs of 21,837 ECGs with a 500 Hz sampling rate~\cite{zheng202012}. This dataset has 54 labels, however we only use 11 of the most common labels. 
+    \item \textbf{PTB-XL} is an open access dataset, used in recent benchmarks~\cite{strodthoff2020deep}. This dataset contains 12-lead ECGs of 21,837 ECGs with a 500 Hz sampling rate~\cite{zheng202012}. The original dataset has 54 labels, however after dropping uncommon labels, we are left with 11. 
 \end{itemize}
 % do i cite this? results are bad but more recent: https://bmcmedinformdecismak.biomedcentral.com/articles/10.1186/s12911-021-01546-2
 
@@ -243,7 +247,7 @@ st depression                &   869 \\
 
 
 
-\section{Software}
+% \section{Software}
 % what it can do
 % download and process physionet data for memap arrays
 % models provided by tsai
@@ -255,10 +259,7 @@ st depression                &   869 \\
 % a script which runs experiments
 % a script which analyses experiments?
 \label{sec:software}
-\section{Models}
-\label{sec:models}
-{\color{red} incomplete}\\
-We use three models with proven results in state of the art time-series classification tasks: the Inception-Time Network, which is the 1-dimensional application of the Inception-Network~\cite{szegedy2017inception,ismail2020inceptiontime} and MiniRocket, a quick and mostly deterministic feature extractor for time-series~\cite{dempster2021minirocket}. A recent survey of time-series classification methods by Ruiz~\textit{et al.} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In the context of ECG classification, Inception-Time has achieved state of the art performance ECG classification tasks~\cite{Strodthoff2021}.
+
 \begin{figure*}[tbp]
  % Caption and label go in the first argument and the figure contents
  % go in the second argument
@@ -273,16 +274,26 @@ We use three models with proven results in state of the art time-series classifi
 Using the three datasets and three models discussed in Sections~\ref{datasets} and~\ref{sec:models}, we experiment with three common pre-processing functions. As discussed previously, some SOTA classifiers have used one or more of these functions, while others have omitted them entirely~\cite{ribeiro2020automatic}. The goal here is to see if we can find consistent results when applying these functions to different models and datasets. These are:
 \begin{itemize}
     \item Scaling/Down-sampling
-    \item Normalizing
     \item Bandpass Filtering
+    \item Normalizing
 \end{itemize}
 
 
 \section{Scaling}
 \label{sec:scaling}
-The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different versions, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. We run this training/testing step 20 times, and record the F1 measure of the best model for all labels. We use the wilcox-holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep} to get the average ranking for each model, as well as whether the differences between each model pairs is significant. These results are shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. In Sinus Rythm, also common in all 3 datasets, the inception network with lowest possible sampling rate clearly out-performs. {\color{red} do we highlight all visible patterns here?}\\
+The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different versions, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. We run this training/testing step 20 times, and record the F1 measure of the best model for all labels. We use the wilcox-holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep} to get the average ranking for each model, as well as whether the differences between each model pairs is significant. These results are shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. {\color{red} do we highlight all visible patterns here?}\\
 
 Readers interested in comparisons of the 3 models under different scaling conditions can see Appendix~\ref{apd:model_vs_model}. 
+
+\section{Band-Pass Filtering}
+\label{sec:BandPass}
+A band-pass filter removes all frequencies outside its range, which can be an effective noise removal technique. The band-pass filter range applied to ECG data varies greatly in past works. Typically, the high-pass filter takes on a value of 0.05-1Hz, and the low-pass filter is applied somewhere between 30-150Hz~\cite{uwaechia2021comprehensive,luo2010review}. Is there an ``optimal" range for a band-pass filter in this context? Is band-pass filtering even necessary when using large datasets and large DL models?
+
+In order to speed up training, we down-sample each dataset to 250Hz. We then apply 3 different band-pass filters to the data before training the 3 models. The 3 ranges are 1-30Hz, 1-50Hz, 1-100Hz. We also compare to the case when no filtering was applied to the dataset. 
+
+
+\section{Normalization}
+\label{sec:Norm}
 
 
 \bibliography{pmlr-sample}
@@ -294,7 +305,7 @@ Readers interested in comparisons of the 3 models under different scaling condit
  % go in the second argument
 \floatconts
   {fig:image}
-  {\caption{Model performance comparison for all datasets}}
+  {\caption{Model performance comparison for all datasets. Best models (those with the lowest average ranking) are higher on the y-axis.}}
   {\includegraphics[width=1\linewidth]{images/model_comparisons_alldatasets.pdf}}
  
 \end{figure*}
