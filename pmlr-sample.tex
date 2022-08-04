@@ -141,7 +141,7 @@ The state of the art for the automatic classification of cardio-vascular disease
     \item Resizing: Since signals are time-series, they can vary in length. Resizing refers to fixing the length of the signals before they are given to models. In this work, we do not explore various approaches to resizing, rather, we pad samples with zeros on the right when lower than our desired fixed length. 
     \item Resampling (down-sampling): ECGs are typically sampled at the rate of 500Hz~\cite{luo2010review,uwaechia2021comprehensive}, meaning that each second of an ECG recording contains 500 samples. The act of down-sampling an ECG is akin to resolution reduction of an image. This can drastically lower training times and hardware requirements, yet it is possible that important information could be lost. In this works we explore the effect of different down-sampling (or scaling) rates on the performance of ML models. We discuss our findings in Section~\ref{sec:scaling}. 
     \item Band-Passing: A band-pass filter is used for the removal of frequencies outside of its two cut-offs. All frequencies below the high-pass cut-off and above the low-pass cut-off are removed or reduced. This can improve performance as noise can interfere with the learning process. In this work we compare the use of different cut-offs as well as the case when no filtering was applied to the dataset. The results are shown in Section~\ref{sec:BandPass}.
-    \item Normalizing: Normalization of input values has been shown to produce better or equal value results in image and time-series classification~\cite{bhanja2018impact}. Particularly in the case of ECGs, there can be differences in recorded amplitudes depending on the equipment used~\cite{uwaechia2021comprehensive}, making normalization a logical step in pre-processing. Here we compare 3 different normalization algorithms proposed by previous works as well as the case when no normalization was applied. We show the results in Section~\ref{sec:Norm}
+    \item Normalizing: Normalization of input values has been shown to produce better or equal value results in image and time-series classification~\cite{bhanja2018impact}{\color{red} cite more/better}. Particularly in the case of ECGs, there can be differences in recorded amplitudes depending on the equipment used~\cite{uwaechia2021comprehensive}, making normalization a logical step in pre-processing. Here we compare 3 different normalization algorithms proposed by previous works as well as the case when no normalization was applied. We show the results in Section~\ref{sec:Norm}
 \end{itemize}
 
 There is also great variety in the architectures used to learn from ECG datasets, or time-series data more generally. Here, we use three models with proven results in state of the art time-series classification tasks: the Inception-Time Network, which is the 1-dimensional application of the Inception-Network~\cite{szegedy2017inception,ismail2020inceptiontime} and MiniRocket, a quick and mostly deterministic feature extractor for time-series~\cite{dempster2021minirocket}. A recent survey of time-series classification methods by~\cite{ruiz2021great} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In the context of ECG classification, Inception-Time has achieved state of the art performance ECG classification tasks~\cite{Strodthoff2021}. The third architecture tested here is xresnet1d101, a resnet model for time-series which was found to be the overall best performer in a benchmark study of best architectures for classification of ECGs~\cite{strodthoff2020deep} .
@@ -274,7 +274,7 @@ st depression                &   869 \\
 \end{figure*}
 \section{Experiment Methodology}
 \label{sec:experiment}
-{\color{red} incomplete}\\
+
 In Section~\ref{sec:prevwork} we discussed common pre-processing functions, and how some SOTA classifiers have used one or more of these functions, while others have omitted them entirely as seen in Table~\ref{tab:top5} as well as works by~\cite{ribeiro2020automatic}{\color{red}(should put in more works here)}. We also discussed three SOTA architectures for time-series classification, and in Section~\ref{datasets}, we described the three datasets of multi-labeled ECGs that the models can learn from. ~\textit{Best practices for ECG pre-processing can be established if we see consistent patterns of improvement in performance scores when applying a pre-processing function to different datasets, and comparing the performances of the models}. \\
 
 To compare pre-processing methods, we apply the methods we want to compare to each dataset. For example, we would have the CPSC dataset at various sampling rates: CPSC\_500Hz, CPSC\_250Hz, etc. For each version of the dataset (i.e, the dataset pre-processed using a different function), we train and test each model 20 times. For 20 rounds, the data is randomly split in 80/10/10 training/validation/testing sets. Each model is trained on the training set, and the best model (according to the F1 score on the validation set) is saved to disk. When no improvements in the F1 measure is seen after 30 epochs, the training stops, and the best model's F1 score on the test set is saved as the performance score of the experiment. This means that for each dataset/pre-processing/model combination, we have 20 performance scores. 
@@ -298,6 +298,53 @@ A band-pass filter removes all frequencies outside its range, which can be an ef
 
 In order to speed up training, we down-sample each dataset to 250Hz. We then apply 3 different band-pass filters to the data before training the 3 models. The 3 ranges are 1-30Hz, 1-50Hz, 1-100Hz. We also compare to the case when no filtering was applied to the dataset. 
 
+
+\begin{table}[hbtp]
+\floatconts
+  {tab:example-booktabs}
+  {\caption{A Table With Horizontal Lines}}
+  {\begin{tabular}{|llll|l|}
+  \toprule
+  - & \bfseries CPSC & \bfseries Chap & \bfseries PTBX. & \bfseries All\\
+  \midrule
+  
+  Incep.  & -0.154  & -0.036 & -0.003 & -0.055      \\
+  Mini. & 0.017   & 0.010   & 0.0528   & 0.026       \\
+  xres.    & -0.0925 & 0.0833  & 0.111    & 0.0536       \\
+  \hline
+  All & 0.148   & -0.070  & -0.217   & 0.0393      \\
+  \bottomrule
+  \end{tabular}}
+\end{table}
+
+\begin{table}[htbp]
+\floatconts
+  {tab:example-hline}
+  {\caption{A Table With Horizontal and Vertical Lines}}%
+  {%
+    \begin{tabular}{|lllll|}
+    \hline
+    \abovestrut{2.2ex}\bfseries Dataset & \bfseries Result\\\hline
+    \abovestrut{2.2ex}
+          & CPSC    & Chap. & PTBX    & All  \\
+          Incep.  & -0.154  & -0.036 & -0.003 & -0.055      \\
+    % \belowstrut{0.2ex}Data4 & 0.09876\\\hline
+    \end{tabular}
+  }
+\end{table}
+
+
+% \begin{table}[]
+% \begin{tabular}{lllll}
+%           & CPSC    & Chap. & PTBX    & All  \\
+% Incep.  & -0.154  & -0.036 & -0.003 & -0.055      \\
+% Mini. & 0.017   & 0.010   & 0.0528   & 0.026       \\
+% xres.    & -0.0925 & 0.0833  & 0.111    & 0.0536       \\
+% All & 0.148   & -0.070  & -0.217   & 0.0393      
+% \end{tabular}
+% \caption{}
+% \label{tab:sr_correlations}
+% \end{table}
 
 \section{Normalization}
 \label{sec:Norm}
