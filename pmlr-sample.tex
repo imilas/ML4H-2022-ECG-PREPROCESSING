@@ -260,31 +260,41 @@ st depression                &   869 \\
 % a script which analyses experiments?
 \label{sec:software}
 
-\begin{figure*}[tbp]
+\begin{figure*}[t]
  % Caption and label go in the first argument and the figure contents
  % go in the second argument
 \floatconts
   {fig:scaling_results_per_disease}
   {\caption{Performance of the models for each dataset and disease at varying scaling rates. The 15 models are ranked against each other, and the lower the ranking the better the model performed. }}
-  {\includegraphics[width=1\linewidth]{images/Per-Disease_Model_Performance_all.pdf}}
+  {
+  
+  \resizebox{1.2\linewidth}{!}{\includegraphics{images/Per-Disease_Model_Performance_all.pdf}}
+  
+  }
 \end{figure*}
 \section{Experiment Methodology}
 \label{sec:experiment}
 {\color{red} incomplete}\\
 In Section~\ref{sec:prevwork} we discussed common pre-processing functions, and how some SOTA classifiers have used one or more of these functions, while others have omitted them entirely as seen in Table~\ref{tab:top5} as well as works by~\cite{ribeiro2020automatic}{\color{red}(should put in more works here)}. We also discussed three SOTA architectures for time-series classification, and in Section~\ref{datasets}, we described the three datasets of multi-labeled ECGs that the models can learn from. ~\textit{Best practices for ECG pre-processing can be established if we see consistent patterns of improvement in performance scores when applying a pre-processing function to different datasets, and comparing the performances of the models}. \\
 
-To compare pre-processing methods, we apply the methods we want to compare to each dataset. For example, we would have the CPSC dataset at various sampling rates: CPSC\_500Hz, CPSC\_250Hz, etc. For each different version of the dataset, we conduct 20 experiments with each model. In each experiment, the data is randomly split in 80/10/10 training/validation/testing sets. Each model is trained on the training set, and the best model (according to the F1 score on the validation set) is saved to disk. When no improvements in the F1 measure is seen after 30 epochs, the training stops, and the best model's F1 score on the test set is saved as the performance score of the experiment. This means that for each dataset/pre-processing/model combination, we have 20 performance scores. In this case, we use the Wilcoxon signed rank test to measure whether each model out-performs every other model. {\color{red} describe cd\_diagrams here. also make a flow-chart/diagram  of how experiments are run}\\  
+To compare pre-processing methods, we apply the methods we want to compare to each dataset. For example, we would have the CPSC dataset at various sampling rates: CPSC\_500Hz, CPSC\_250Hz, etc. For each version of the dataset (i.e, the dataset pre-processed using a different function), we train and test each model 20 times. For 20 rounds, the data is randomly split in 80/10/10 training/validation/testing sets. Each model is trained on the training set, and the best model (according to the F1 score on the validation set) is saved to disk. When no improvements in the F1 measure is seen after 30 epochs, the training stops, and the best model's F1 score on the test set is saved as the performance score of the experiment. This means that for each dataset/pre-processing/model combination, we have 20 performance scores. 
+
+In this case, we use the Wilcoxon signed rank test to measure whether each model out-performs every other model. To rank and compare the models, we use the Wilcox-Holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep}. This analysis shows whether the differences between each model pair is significant, and ranks each model. While~\cite{IsmailFawaz2018deep} uses the average rank to show relative performance, we use the "Mean Reciprocal Rank" (MRR) for each model. Here, $rank_i$ refers to the model's rank relative to the other models when trained/validated/tested on the same subsets of a dataset, and $Q=20$ since for each model/dataset combination we are "bootstrapping" 20 times:
+\[ \text{MRR} = \frac{1}{Q}\sum_{i=1}^{Q}\frac{1}{rank_i} \]
 
 
-\section{Scaling}
+\section{Scaling/Down-sampling}
 \label{sec:scaling}
-The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different sampling rates, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. In total, for each dataset, we run 15 experiments (3 architectures, and 5 different sampling rates) and for each experiment, we measure 20 performance scores by running the training/validation/testing step and measuring the macro-average F1 score on the test set.~{\color{red} Show how high the performance cost for this is, in time and VRAM required}. We use the wilcox-holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep} to get the average ranking for each model, as well as whether the differences between each model pairs is significant. These results are shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. {\color{red} do we highlight all visible patterns here?}\\
+The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different sampling rates, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. In total, for each dataset, we run 15 experiments (3 architectures, and 5 different sampling rates) and for each experiment, we measure 20 performance scores by running the training/validation/testing step and measuring the macro-average F1 score on the test set.~{\color{red} Show how high the performance cost for this is, in time and VRAM required}. We use the Wilcox-Holm post-hoc analysis described in the methodology (Section~\ref{sec:experiment}) to get the rank and relative performance for each model. 
+\subsection{Downsampling Results}
+These results are shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. {\color{red} which other patterns do we highlight?}\\
 
+ {\color{red} Abram feedback: Show correlation between sampling rate and performance, and sampling rate and rank}
 Readers interested in comparisons of the 3 models under different scaling conditions can see Appendix~\ref{apd:model_vs_model}. 
 
 \section{Band-Pass Filtering}
 \label{sec:BandPass}
-A band-pass filter removes all frequencies outside its range, which can be an effective noise removal technique. The band-pass filter range applied to ECG data varies greatly in past works. Typically, the high-pass filter takes on a value of 0.05-1Hz, and the low-pass filter is applied somewhere between 30-150Hz~\cite{uwaechia2021comprehensive,luo2010review}. Is there an ``optimal" range for a band-pass filter in this context? Is band-pass filtering even necessary when using large datasets and large DL models?
+A band-pass filter removes all frequencies outside its range, which can be an effective noise removal technique. The band-pass filter range applied to ECG data varies greatly in past works. Typically, the high-pass filter takes on a value of 0.05-1Hz, and the low-pass filter is applied somewhere between 30-150Hz~\cite{uwaechia2021comprehensive,luo2010review}.~{\color{red}there are a lot more works to cite here}. Is there an ``optimal" range for a band-pass filter in this context? Is band-pass filtering even necessary when using large datasets and large DL models?
 
 In order to speed up training, we down-sample each dataset to 250Hz. We then apply 3 different band-pass filters to the data before training the 3 models. The 3 ranges are 1-30Hz, 1-50Hz, 1-100Hz. We also compare to the case when no filtering was applied to the dataset. 
 
