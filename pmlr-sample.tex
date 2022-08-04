@@ -87,7 +87,7 @@
 \maketitle
 
 \begin{abstract}
-Are there any best practices for pre-processing of Electrocardiogram (ECG) signals for automatic diagnosis of heart disease? 
+We are looking for universal best practices in pre-processing of Electrocardiogram (ECG) signals in order to train better models for the diagnosis of heart disease.
 State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on how ECGs should be pre-processed.  Is this lack of consensus due to different diseases and model architectures requiring different pre-processing steps for optimal performance? Is it possible that state-of-the-art deep-learning models have rendered such pre-processing methods unnecessary? In this work we apply down-sampling, normalization, and filtering functions to 3 different multi-label ECG datasets and measure their effects on 3 different SOTA time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. (findings of normalization and filtering are pending)
 
 \end{abstract}
@@ -102,11 +102,11 @@ electrocardiogram, machine learning, signal processing
 % We wrote a project where we can test out pre-processing functions
 % we ran an experiment on downsampling of ECGs, is the typical 500hz necessary?
 \label{sec:intro}
-In this work, we focus on data pre-processing decisions faced by researchers in the field of automatic classification of cardiovascular conditions using Electrocardiograms. The ever-growing number of tools and approaches available for machine learning often requires a number of a priori guesses to be made by those who process data and train models for machine learning tasks.
-An Electrocardiogram (ECG) is a recording of the electrical activity of the cardiovascular system. ECGs are routinely utilized by clinicians for diagnoses of cardiovascular abnormalities. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
+In this work, we focus on the Electrocardiogram (ECG) pre-processing decisions faced by researchers working towards automatic classification of cardiovascular conditions. The ever-growing number of tools and approaches available for machine learning often requires a number of a priori guesses to be made by those who process the training data and design the architectures, and training models which predict heart disease is no exception.
+Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system. {\color{red} need a lot more citations here}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
 
 
-In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions, due to the variety of implementations in previous works. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\cite{hong2022practical}. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
+In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\cite{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork} there is a large variety of implementations for such functions in past works, and finding a trend between pre-processing functions used and performance results is not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
 
 
 In this work we aim to simplify this decision space for other researchers by using our code to test the effect of \textit{down-sampling}, \textit{band-passing}, and \textit{normalizing} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.  {\color{red} will also include quick summary of bandpassing and normalizing results}\\
@@ -133,14 +133,15 @@ In this work we aim to simplify this decision space for other researchers by usi
 
 \end{table*}
 \section{Previous Work}
-{\color{red} needs: works which used the pre-processing methods in question}\\
+{\color{red} needs: \\
+works which used the pre-processing methods in question\\ discuss notch filters?}\\
 % physionet and metaphysionet?
 \label{sec:prevwork}
 The state of the art for the automatic classification of cardio-vascular disease continually improves as more data sets become available and computation costs decrease. However, no consensus seems to exist on the best pre-processing steps for such datasets. Here, we define pre-processing as ``any function which aims to simplify or transform the data in-order to simplify the learning process". \cite{hong2022practical} highlight 4 different popular pre-processing methods for ECG signals, based on their analysis of the entries to the Physionet2020 Challange~\cite{goldberger2000physiobank,alday2020classification}:
 \begin{itemize}
     \item Resizing: Since signals are time-series, they can vary in length. Resizing refers to fixing the length of the signals before they are given to models. In this work, we do not explore various approaches to resizing, rather, we pad samples with zeros on the right when lower than our desired fixed length. 
     \item Resampling (down-sampling): ECGs are typically sampled at the rate of 500Hz~\cite{luo2010review,uwaechia2021comprehensive}, meaning that each second of an ECG recording contains 500 samples. The act of down-sampling an ECG is akin to resolution reduction of an image. This can drastically lower training times and hardware requirements, yet it is possible that important information could be lost. In this works we explore the effect of different down-sampling (or scaling) rates on the performance of ML models. We discuss our findings in Section~\ref{sec:scaling}. 
-    \item Band-Passing: A band-pass filter is used for the removal of frequencies outside of its two cut-offs. All frequencies below the high-pass cut-off and above the low-pass cut-off are removed or reduced. This can improve performance as noise can interfere with the learning process. In this work we compare the use of different cut-offs as well as the case when no filtering was applied to the dataset. The results are shown in Section~\ref{sec:BandPass}.
+    \item Band-Passing: Many sources can intorduce noise to ECG signals. Powerlines are a common source~\cite{uwaechia2021comprehensive}, and depending on the region they can introduce noise at various frequencies. Some ECG recording hardware have band rejection (or notch filters) built in to deal with such issues. However, there are other unaccounted sources of noise which need to be dealt with at the software level. A band-pass filter is used for the removal of frequencies outside of its two cut-offs. All frequencies below the high-pass cut-off and above the low-pass cut-off are removed or reduced. This can improve performance as noise can interfere with the learning process. In this work we compare the use of different cut-offs as well as the case when no filtering was applied to the dataset. The results are shown in Section~\ref{sec:BandPass}. \textit{notch filters}
     \item Normalizing: Normalization of input values has been shown to produce better or equal value results in image and time-series classification~\cite{bhanja2018impact}{\color{red} cite more/better}. Particularly in the case of ECGs, there can be differences in recorded amplitudes depending on the equipment used~\cite{uwaechia2021comprehensive}, making normalization a logical step in pre-processing. Here we compare 3 different normalization algorithms proposed by previous works as well as the case when no normalization was applied. We show the results in Section~\ref{sec:Norm}
 \end{itemize}
 
@@ -265,7 +266,7 @@ st depression                &   869 \\
  % go in the second argument
 \floatconts
   {fig:scaling_results_per_disease}
-  {\caption{Performance of the models for each dataset and disease at varying scaling rates. The 15 models are ranked against each other, and the lower the ranking the better the model performed. }}
+  {\caption{Performance of the models for each dataset and disease at varying scaling rates. The 15 models are ranked against each other, the close the MRR is to 1, the better the model performed relative to others.}}
   {
   
   \resizebox{1.2\linewidth}{!}{\includegraphics{images/Per-Disease_Model_Performance_all.pdf}}
@@ -279,7 +280,7 @@ In Section~\ref{sec:prevwork} we discussed common pre-processing functions, and 
 
 To compare pre-processing methods, we apply the methods we want to compare to each dataset. For example, we would have the CPSC dataset at various sampling rates: CPSC\_500Hz, CPSC\_250Hz, etc. For each version of the dataset (i.e, the dataset pre-processed using a different function), we train and test each model 20 times. For 20 rounds, the data is randomly split in 80/10/10 training/validation/testing sets. Each model is trained on the training set, and the best model (according to the F1 score on the validation set) is saved to disk. When no improvements in the F1 measure is seen after 30 epochs, the training stops, and the best model's F1 score on the test set is saved as the performance score of the experiment. This means that for each dataset/pre-processing/model combination, we have 20 performance scores. 
 
-In this case, we use the Wilcoxon signed rank test to measure whether each model out-performs every other model. To rank and compare the models, we use the Wilcox-Holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep}. This analysis shows whether the differences between each model pair is significant, and ranks each model. While~\cite{IsmailFawaz2018deep} uses the average rank to show relative performance, we use the "Mean Reciprocal Rank" (MRR) for each model. Here, $rank_i$ refers to the model's rank relative to the other models when trained/validated/tested on the same subsets of a dataset, and $Q=20$ since for each model/dataset combination we are "bootstrapping" 20 times:
+In this case, we use the Wilcoxon signed rank test to measure whether each model out-performs every other model. To rank and compare the models, we use the Wilcox-Holm post-hoc analysis used for creating critical-difference diagrams by~\cite{IsmailFawaz2018deep}. This analysis shows whether the differences between each model pair is significant, and ranks each model. While~\cite{IsmailFawaz2018deep} uses the average rank to show relative performance, we use the "Mean Reciprocal Rank" (MRR) for each model. Here, $rank_i$ refers to the model's rank relative to the other models when trained/validated/tested on the same subsets of a dataset, and $Q=20$ since for each model/dataset combination we have 20 F1 scores:
 \[ \text{MRR} = \frac{1}{Q}\sum_{i=1}^{Q}\frac{1}{rank_i} \]
 
 
@@ -287,9 +288,9 @@ In this case, we use the Wilcoxon signed rank test to measure whether each model
 \label{sec:scaling}
 The scaling rates used here are 0.1, 0.25, 0.5, 0.75, and 1. When applied to the ECGs (all of which have the sampling rate of 500Hz), these scaling rates down-sample the signals to the corresponding sampling rates of 50Hz, 125Hz, 250Hz, 375Hz, and the unmodified 500Hz. Effectively, each dataset has 5 different sampling rates, and each of the 3 models learns from these datasets by randomly selecting 80\% of the dataset for training, 10\% for validation, and 10\% for testing. In total, for each dataset, we run 15 experiments (3 architectures, and 5 different sampling rates) and for each experiment, we measure 20 performance scores by running the training/validation/testing step and measuring the macro-average F1 score on the test set.~{\color{red} Show how high the performance cost for this is, in time and VRAM required}. We use the Wilcox-Holm post-hoc analysis described in the methodology (Section~\ref{sec:experiment}) to get the rank and relative performance for each model. 
 \subsection{Downsampling Results}
-These results are shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. {\color{red} which other patterns do we highlight?}\\
+The MRR for each model when predicting each label is shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. {\color{red} which other patterns do we highlight?}\\
+We also show the Pearson correlation between sampling rate and performance in Table~\ref{tab:sr_corr}.{\color{red} discuss how you calculate this in more detail. What does the dataframe look like?}\\ There is a per-dataset and per-model breakdown of the correlation values, as well as the values when all datasets or all models are considered. Here, we use Pearson correlation since we want to know the mapping between two continuous variables: sampling rates between 50-500Hz and F1 performance. Overall, when considering all models and all datasets, we see a negligible correlation of 0.039. Based on these results, while sampling rate does appear to be an important factor in diagnosis of some labels, it does not standout as a particularly important factor when training a multi-label model. 
 
- {\color{red} Abram feedback: Show correlation between sampling rate and performance, and sampling rate and rank}
 Readers interested in comparisons of the 3 models under different scaling conditions can see Appendix~\ref{apd:model_vs_model}. 
 
 \section{Band-Pass Filtering}
@@ -301,50 +302,21 @@ In order to speed up training, we down-sample each dataset to 250Hz. We then app
 
 \begin{table}[hbtp]
 \floatconts
-  {tab:example-booktabs}
-  {\caption{A Table With Horizontal Lines}}
+  {tab:sr_corr}
+  {\caption{Pearson correlation between sampling rate and performance. We show the correlation for each dataset and model combination. We also measure the value when isolating for a dataset and looking at all models and vice versa. When all models and datasets are concatenated, the correlation value is 0.039. }}
   {\begin{tabular}{|llll|l|}
-  \toprule
-  - & \bfseries CPSC & \bfseries Chap & \bfseries PTBX. & \bfseries All\\
-  \midrule
+  \hline
+   & \bfseries CPSC & \bfseries Chap & \bfseries PTBX. & \bfseries All\\\hline
   
   Incep.  & -0.154  & -0.036 & -0.003 & -0.055      \\
-  Mini. & 0.017   & 0.010   & 0.0528   & 0.026       \\
-  xres.    & -0.0925 & 0.0833  & 0.111    & 0.0536       \\
+  Mini. & 0.017   & 0.010   & 0.053   & 0.026       \\
+  xres.    & -0.093 & 0.083  & 0.111    & 0.054       \\
   \hline
-  All & 0.148   & -0.070  & -0.217   & 0.0393      \\
-  \bottomrule
+  All & -0.227  & 0.1469   & 0.1545  & 0.039   \\
+  \hline
   \end{tabular}}
 \end{table}
 
-\begin{table}[htbp]
-\floatconts
-  {tab:example-hline}
-  {\caption{A Table With Horizontal and Vertical Lines}}%
-  {%
-    \begin{tabular}{|lllll|}
-    \hline
-    \abovestrut{2.2ex}\bfseries Dataset & \bfseries Result\\\hline
-    \abovestrut{2.2ex}
-          & CPSC    & Chap. & PTBX    & All  \\
-          Incep.  & -0.154  & -0.036 & -0.003 & -0.055      \\
-    % \belowstrut{0.2ex}Data4 & 0.09876\\\hline
-    \end{tabular}
-  }
-\end{table}
-
-
-% \begin{table}[]
-% \begin{tabular}{lllll}
-%           & CPSC    & Chap. & PTBX    & All  \\
-% Incep.  & -0.154  & -0.036 & -0.003 & -0.055      \\
-% Mini. & 0.017   & 0.010   & 0.0528   & 0.026       \\
-% xres.    & -0.0925 & 0.0833  & 0.111    & 0.0536       \\
-% All & 0.148   & -0.070  & -0.217   & 0.0393      
-% \end{tabular}
-% \caption{}
-% \label{tab:sr_correlations}
-% \end{table}
 
 \section{Normalization}
 \label{sec:Norm}
