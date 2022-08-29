@@ -110,8 +110,7 @@ Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, 
 In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\cite{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork} there is a large variety of implementations for such functions in past works, and finding a trend between pre-processing functions used and performance results is not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
 
 
-In this work we aim to simplify this decision space for other researchers by using our code to test the effect of \textit{downsampling}, \textit{band-passing}, and \textit{normalizing} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that downsampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance. In Section~\ref{sec:experiment} we discuss the experiment setup and results.  {\color{red} will also include quick summary of bandpassing and normalizing results}\\
-
+In this work we aim to simplify this decision space for other researchers by using our code to test the effect of \textit{downsampling}, \textit{band-passing}, and \textit{normalizing} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that downsampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance.  We found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. In Section~\ref{sec:experiment} we discuss the experiment setup and performance measures, and the discuss the results of downsampling, bandpassing, and normalization in Sections~\ref{sec:scaling},~\ref{sec:BandPass},and ~\ref{sec:Norm}. 
 
 
 \begin{table*}[tbp]
@@ -136,7 +135,7 @@ In this work we aim to simplify this decision space for other researchers by usi
 
 \section{Previous Work}
 {\color{red} needs: \\
-works which used the pre-processing methods in question\\ discuss notch filters?}\\
+works which used the pre-processing methods in question\\}\\
 % physionet and metaphysionet?
 \label{sec:prevwork}
 The state of the art for the automatic classification of cardio-vascular disease continually improves as more data sets become available and computation costs decrease. However, no consensus seems to exist on the best pre-processing steps for such datasets. Here, we define pre-processing as ``any function which aims to simplify or transform the data in-order to simplify the learning process". \cite{hong2022practical} highlight 4 different popular pre-processing methods for ECG signals, based on their analysis of the entries to the Physionet2020 Challange~\cite{goldberger2000physiobank,alday2020classification}:
