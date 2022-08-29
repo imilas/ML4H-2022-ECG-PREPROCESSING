@@ -88,7 +88,7 @@
 
 \begin{abstract}
 We are looking for universal best practices in pre-processing of Electrocardiogram (ECG) signals in order to train better models for the diagnosis of heart disease.
-State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on pre-processing best practices.  Is this lack of consensus due to different diseases and model architectures requiring different processing steps for optimal performance? Is it possible that state-of-the-art deep-learning models have rendered pre-processing unnecessary? In this work we apply downsampling, normalization, and filtering functions to 3 different multi-label ECG datasets and measure their effects on 3 different SOTA time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. (findings of normalization and filtering are pending)
+State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on pre-processing best practices.  Is this lack of consensus due to different diseases and model architectures requiring different processing steps for optimal performance? Is it possible that state-of-the-art deep-learning models have rendered pre-processing unnecessary? In this work we apply downsampling, normalization, and filtering functions to 3 different multi-label ECG datasets and measure their effects on 3 different SOTA time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. We found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. 
 
 \end{abstract}
 \begin{keywords}
@@ -102,8 +102,9 @@ electrocardiogram, machine learning, signal processing
 % We wrote a project where we can test out pre-processing functions
 % we ran an experiment on downsampling of ECGs, is the typical 500hz necessary?
 \label{sec:intro}
-In this work, we focus on the Electrocardiogram (ECG) pre-processing decisions faced by researchers working towards automatic classification of cardiovascular conditions. The ever-growing number of tools and approaches available for machine learning often requires a number of a priori guesses to be made by those who process the training data and design the architectures, and training models which predict heart disease is no exception.
-Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system. {\color{red} need a lot more citations here}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
+We focus on the Electrocardiogram (ECG) pre-processing decisions faced by researchers working towards automatic classification of cardiovascular conditions. The ever-growing number of tools and approaches available for machine learning often requires a number of a priori guesses to be made by those who process the training data and design the architectures. The task of training models which predict heart disease is no exception.
+
+Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system~\cite{uwaechia2021comprehensive,hong2022practical,IsmailFawaz2018deep,strodthoff2020deep,chen2020detection}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
 
 
 In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions. Pre-processing functions are transformation functions applied to signals such as ECGs in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\cite{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork} there is a large variety of implementations for such functions in past works, and finding a trend between pre-processing functions used and performance results is not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
@@ -328,9 +329,9 @@ The ECG signals in our dataset are recorded at 500Hz. We apply the  scaling rate
 ~{\color{red} Show how high the performance cost for this is, in time and VRAM required}. We use the Wilcox-Holm post-hoc analysis described in the methodology (Section~\ref{sec:experiment}) to get the rank and relative performance for each model. 
 \subsection{Downsampling Results}
 \label{sec_ds_results}
-The MRR for each model when predicting each label is shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. Kruskal-Wallis p-values in Table~\ref{tab:kruskal-wallis} show that sampling rate is an important factor in 10 out of 20 diseases. From these observations we can conclude that sampling rate is an important factor for better diagnosis of \textit{some} heart conditions.
+The MRR for each model when predicting each label is shown in Figure~\ref{fig:scaling_results_per_disease}. Here, no consistent pattern can be seen across diseases and scaling rates, however, some trends are observable. For example, for Atrial fibrillation which is common label in all 3 datasets, we see that DL models with higher sampling rates performed the best. Another interesting label is Sinus Rythm, also common in all 3 datasets,  where the inception network with lowest possible sampling rate clearly out-performs. Kruskal-Wallis p-values in Table~\ref{tab:kruskal_wallis} show that sampling rate is an important factor in 10 out of 20 diseases. From these observations we can conclude that sampling rate is an important factor for better diagnosis of \textit{some} heart conditions.
 
-We also show the Spearman correlation between sampling rate and performance in Table~\ref{tab:sr_corr}. There is a per-model breakdown of the correlation values, as well as the values when all datasets and all models are considered. Here, correlation measures the mapping between two continuous variables: sampling rates between 50-500Hz and F1 performance. Overall, when considering all models and all datasets, we see a negligible correlation of 0.039. This suggests that sampling-rate is \textbf{not} an important factor in the overall results of our training. 
+We also show the Spearman correlation between sampling rate and performance in Table~\ref{tab:corr}. There is a per-model breakdown of the correlation values, as well as the values when all datasets and all models are considered. Here, correlation measures the mapping between two continuous variables: sampling rates between 50-500Hz and F1 performance. Overall, when considering all models and all datasets, we see a negligible correlation of 0.039. This suggests that sampling-rate is \textbf{not} an important factor in the overall results of our training. 
 
 
 \textbf{Main Takeaway:} Based on these results, sampling rate does appear to be an important factor in diagnosis of some labels, however, it does not standout as a particularly important factor when training a multi-label model, unless some labels in the models are weighted differently than others. This is a significant find as sampling-rate has a near 1-to-1 effect on the speed and hardware required for training SOTA models on large datasets of ECG signals, and these results suggest that it is possible to reduce sampling rates from the standard 500Hz to 250Hz and lower without major loss in over-all performance. 
@@ -338,17 +339,17 @@ We also show the Spearman correlation between sampling rate and performance in T
 % Readers interested in comparisons of the 3 models under different scaling conditions can see Appendix~\ref{apd:model_vs_model}. 
 \begin{table}[hbtp]
 \floatconts
-  {tab:sr_corr}
-  {\caption{Spearman correlation between sampling rate and performance, and sampling rate and MRR. The correlations are measured for each model as well as the combined results of all models. When the results for all models across all datasets are concatenated, the correlation value is 0.008 for the performance measure (F1) and 0.078 for MRR. }}
+  {tab:corr}
+  {\caption{Spearman correlation between F1 measures and sampling rate (50Hz-500Hz), and F1 measures and normalization ($0 \xrightarrow{}$ raw, $1 \xrightarrow{} $ minmax ). Overall, we see weak correlations for all scenarios.}}
   {\begin{tabular}{|l|l|l|}
   \hline
-   & \bfseries F1  & \bfseries MRR \\\hline
+   & \bfseries Rate & \bfseries Norm \\\hline
   
-  Inception  & -0.052 & -0.240  \\
-  MiniRocket &  0.027 & 0.177  \\
-  xresnet    & 0.0517 & 0.310  \\
+  Inception  & -5.23e-02 & -1.17e-01  \\
+  MiniRocket &  2.70e-02 & -1.21e-02  \\
+  xresnet    & 5.17e-02 & -9.50e-02 \\
   \hline
-  All Models & .008 & 0.078\\
+  All Models & 8.00e-3 & -7.41e-02\\
   \hline
   \end{tabular}}
 \end{table}
@@ -360,47 +361,8 @@ A band-pass filter removes all frequencies outside its range, which can be an ef
 In Section~\ref{sec_ds_results}, we discussed how downsampling does not appear to have a major effect on the over-all model performance. Here, in order to speed up training, we downsample each dataset to 250Hz. We then apply 3 different band-pass filters to the data before training the 3 models. The 3 ranges are 1-30Hz, 1-50Hz, 1-100Hz. We compare these 3 pre-processing methods to see if the change in the low-pass filter frequency makes a difference in the final outcome, we then make a comparison to the case when no filtering was applied to the dataset. 
 
 \subsection{Band-Pass Filtering Results}
-The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} cannot indicate a difference between the performance of the 4 model groups in question (models trained using the 3 different band-passing functions, and models trained on the raw data). This is an interesting result which may explain the lack of consistency in the application of signal filtering in SOTA ECG classification works.  \\
-\textbf{Main Takeaway:} When dealing with large and pre-processed datasets of ECGs, band-passing is not a necessary step. However, since it does not hurt the final outcomes, and can be quickly applied using GPU, it is advisable to use filtering when dealing with novel data.
-% \begin{table}[hbtp]
-% \floatconts
-%   {tab:sr_corr}
-%   {\caption{Spearman correlation between sampling rate and performance, and sampling rate and MRR. The correlations are measured for each model as well as the combined results of all models. When the results for all models across all datasets are concatenated, the correlation value is 0.008 for the performance measure (F1) and 0.078 for MRR. }}
-%   {\begin{tabular}{|l|l|l|}
-%   \hline
-%   & \bfseries F1  & \bfseries MRR \\\hline
-  
-%   Inception  & -0.052 & -0.240  \\
-%   MiniRocket &  0.027 & 0.177  \\
-%   xresnet    & 0.0517 & 0.310  \\
-%   \hline
-%   All Models & .008 & 0.078\\
-%   \hline
-%   \end{tabular}}
-% \end{table}
-
-
-
-
-
-% \begin{table*}[tbp]
-% \label{tab:top5}
-% {\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
-    
-%     { 
-%     \resizebox{1 \textwidth}{!}{
-%     \begin{tabular}{|c|c|c|c|c|}
-%     \hline
-%     Rank & Group                                          & Scaling                   & Normalize            & BandPass                  \\ \hline
-%     1    & Wide and Deep Transformer~\cite{natarajan2020wide}                   &                           & \checkmark & \checkmark \\ \hline
-%     2    & Adaptive ResNet~\cite{zhao2020adaptive}                  & \checkmark & \checkmark & \\ \hline
-%     3    & SE-ResNet~\cite{zhu2020classification}        &                           &                           &                           \\ \hline
-%     4    & Scatter Transform and DNNs ~\cite{oppelt2020combining}             &                           & \checkmark &                           \\ \hline
-%     5    & Adversarial Domain Generalization~\cite{hasani2020classification}&                           &                           & \checkmark \\ \hline
-%     \end{tabular}
-%     }
-% }
-% \end{table*}
+The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} do not indicate a difference between the performance of the 4 model groups in question (models trained using the 3 different band-passing functions, and models trained on the raw data). This is an interesting result which may explain the lack of consistency in the application of signal filtering in SOTA ECG classification works.  \\
+\textbf{Main Takeaway:} When training on multiple labels from large, carefully curated datasets of ECGs, band-passing is not a necessary step. Band-pass filtering does not hurt the final outcomes, and can be applied at the GPU level with low overhead. Therefore in most situations, particularly when dealing with potentially noisy data, it is advisable to use filtering. We cannot make any concrete statements about best cut-off frequencies, as it likely varies based on the recording hardware used and the cardio-vascular conditions being diagnosed. 
 
 
 
@@ -412,6 +374,17 @@ What we refer to as "normalization" is the transformation of an input signal---w
 
 By default, all our experiments have used this technique in the pre-preocessing chain. Here we ran our 3 models on the 3 datasets with no pre-processing, and compare the results to the models with only normalization applied (these would be the models from Section~\ref{sec:scaling} with the unmodified sampling rate of 500Hz). The Kruskal-Wallis results are shown in Table~\ref{tab:kruskal_wallis}
 
+\subsection{Normalization Results}
+The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} show normalization to be an important factor in the outcomes of 7 out of 20 diseases. To calculate the correlation values in Table~\ref{tab:corr}, we added a new label to the results by mapping raw, none-normalized ECGs to 0, and min-max normalized ECGs to 1. We then measure the correlation between F1 values and the normalization type. The correlation values have a slight negative bias, which indicates that in the cases where normalization type was important, more often than not models training on raw ECGs performed better.
+
+\textbf{Main Takeaway} Surprisingly, Min-Max normalization has a slight negative impact on the performance relative to raw ECGs. However, min-max normalization one
+of multiple common normalization methods used for time-series classification~\cite{uwaechia2021comprehensive}, therefore we cannot discourage the use of all normalization methods. However, these results show that although normalization is a staple pre-processing method in some fields of deep-learning, we cannot presume its effectiveness for the task of ECG classification.
+
+
+\section{Discussion}
+We found no consistency in the pre-processing methods used in recent research on the detection of cardiovascular conditions using ECG signals. To address this gap in knowledge, we trained 3 different time-series classifiers on 3 open datasets of ECGs in order to examine the effect of 3 popular pre-processing methods. Our findings suggest that the performance of different pre-processing and architecture combinations varies depending on the condition of interest. This would explain the lack of consistency in previous works, which may be looking at different datasets, using different label weights, or looking at different performance measures. 
+
+Many recent works have highlighted the effectiveness of an ensemble method using various architectures relative to any single model ~\cite{uwaechia2021comprehensive,hong2022practical,IsmailFawaz2018deep,strodthoff2020deep,chen2020detection}. Our findings here suggest that use of various architectures \textit{as well} as different pre-processing methods could yield slight improvements in SOTA benchmarks. However, we would be brute-forcing the problem, rather than solving it. 
 
 \bibliography{pmlr-sample}
 
