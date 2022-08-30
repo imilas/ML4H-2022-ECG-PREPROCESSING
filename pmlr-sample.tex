@@ -87,8 +87,8 @@
 \maketitle
 
 \begin{abstract}
-We are looking for universal best practices in pre-processing of Electrocardiogram (ECG) signals in order to train better models for the diagnosis of heart disease.
-State of the art machine learning algorithms have achieved remarkable results in classification of heart disease using ECG data, yet there appears to be no consensus on pre-processing best practices.  Is this lack of consensus due to different diseases and model architectures requiring different processing steps for optimal performance? Is it possible that state-of-the-art deep-learning models have rendered pre-processing unnecessary? In this work we apply down-sampling, normalization, and filtering functions to 3 different multi-label ECG datasets and measure their effects on 3 different SOTA time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates will result in smaller models, which in turn require less time and resources to train. Despite their common usage in many recent works, we found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. 
+We are searching for best practices in pre-processing of Electrocardiogram (ECG) signals in order to train better classifiers for the diagnosis of heart conditions.
+State of the art machine learning algorithms have achieved remarkable results in classification of \textit{some} heart conditions using ECG data, yet there appears to be no consensus on pre-processing best practices.  Is this lack of consensus due to different conditions and architectures requiring different processing steps for optimal performance? Is it possible that state-of-the-art deep-learning models have rendered pre-processing unnecessary? In this work we apply down-sampling, normalization, and filtering functions to 3 different multi-label ECG datasets and measure their effects on 3 different SOTA time-series classifiers. We find that sampling rates as low as 50Hz can yield comparable results to the commonly used 500Hz. This is significant as smaller sampling rates will result in smaller datasets and models, which require less time and resources to train. Additionally, despite their common usage in many recent works, we found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. 
 
 \end{abstract}
 \begin{keywords}
@@ -97,36 +97,31 @@ electrocardiogram, machine learning, signal processing
 
 
 \section{Introduction}
-% ecgs are used to diagnose heart conditions
-% pre-processing functions can affect model accuracy and training complexity
-% We wrote a project where we can test out pre-processing functions
-% we ran an experiment on down-sampling of ECGs, is the typical 500hz necessary?
 \label{sec:intro}
 We focus on the Electrocardiogram (ECG) pre-processing decisions faced by researchers working towards automatic classification of cardiovascular conditions. The ever-growing number of tools and approaches available for machine learning often requires a number of a priori guesses to be made by those who process the training data and design the architectures. The task of training models which predict heart disease is no exception.
 
-Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system~\cite{uwaechia2021comprehensive}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\cite{reyna2021will,reyna4issues,ribeiro2020automatic,chen2020detection,zhao2020adaptive}. However, training such models requires a large amount of data~\cite{reyna2021will,reyna4issues,natarajan2020wide,ribeiro2020automatic}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
+Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system~\citep{maleki2014use,uwaechia2021comprehensive}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\citep{reyna2021will,reyna4issues,ribeiro2020automatic,chen2020detection,zhao2020adaptive}. However, training such models requires a large amount of data~\citep{reyna2021will,reyna4issues,zhao2020adaptive}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
+
+ Pre-processing functions are transformations applied to signals--ECGs, in this case---in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\citep{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork}, the variety of approaches in past works makes finding a trend between pre-processing functions used and performance results not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes) it is best to consider multiple datasets, architectures, and heart conditions.  
 
 
-In order to automatically classify cardiovascular conditions using ECG data, we are faced with many choices for the pre-processing functions. Pre-processing functions are transformations applied to signals--ECGs, in this case---in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\cite{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork} there is a large variety of implementations for such functions in past works, and finding a trend between pre-processing functions used and performance results is not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes, and their effect on time and hardware requirements) it is best to consider multiple datasets, architectures, and heart conditions.  
+Here, we aim to simplify this decision space for other researchers by testing the effect of \textit{down-sampling}, \textit{band-passing}, and \textit{normalization} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance.  We found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. In Section~\ref{sec:experiment} we discuss the experiment setup and performance measures, and the discuss the results of down-sampling, band-passing, and normalization in Sections~\ref{sec:scaling},~\ref{sec:BandPass}, and~\ref{sec:Norm}. 
 
 
-In this work we aim to simplify this decision space for other researchers by testing the effect of \textit{down-sampling}, \textit{band-passing}, and \textit{normalizing} on the outcome of 3 different multi-label SOTA classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance.  We found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. In Section~\ref{sec:experiment} we discuss the experiment setup and performance measures, and the discuss the results of down-sampling, band-passing, and normalization in Sections~\ref{sec:scaling},~\ref{sec:BandPass}, and~\ref{sec:Norm}. 
-
-
-\begin{table*}[tbp]
+\begin{table*}[htbp]
 \label{tab:top5}
-{\caption{Top 5 teams in Physionet2020 and pre-processing functions used.}}%
+{\caption{Functions used by Top 5 teams in Physionet2020~\citep{hong2022practical}}}%
     
     { 
     \resizebox{1 \textwidth}{!}{
-    \begin{tabular}{|c|c|c|c|c|}
+    \begin{tabular}{|c|c|c|c|c|c|}
     \hline
-    Rank & Group                                          & Scaling                   & Normalize            & BandPass                  \\ \hline
-    1    & Wide and Deep Transformer~\cite{natarajan2020wide}                   &                           & \checkmark & \checkmark \\ \hline
-    2    & Adaptive ResNet~\cite{zhao2020adaptive}                  & \checkmark & \checkmark & \\ \hline
-    3    & SE-ResNet~\cite{zhu2020classification}        &                           &                           &                           \\ \hline
-    4    & Scatter Transform and DNNs ~\cite{oppelt2020combining}             &                           & \checkmark &                           \\ \hline
-    5    & Adversarial Domain Generalization~\cite{hasani2020classification}&                           &                           & \checkmark \\ \hline
+    Rank & Group                                          & Scaling                   & Normalize            & BandPass  & Window              \\ \hline
+    1    & Wide and Deep Transformer~\citep{natarajan2020wide}                   &                           & \checkmark & \checkmark & 15 sec.\\ \hline
+    2    & Adaptive ResNet~\citep{zhao2020adaptive}                  & \checkmark (257 Hz) & \checkmark & & 16 sec.\\ \hline
+    3    & SE-ResNet~\citep{zhu2020classification}        &                           &                           &                           & 30 sec.\\ \hline
+    4    & Scatter Transform and DNNs ~\citep{oppelt2020combining}             &                           & \checkmark &                           & 20.5 sec. \\ \hline
+    5    & Adversarial Domain Generalization~\citep{hasani2020classification} &    \checkmark (250 Hz) & \checkmark   & \checkmark & \\ \hline
     \end{tabular}
     }
 }
@@ -134,16 +129,13 @@ In this work we aim to simplify this decision space for other researchers by tes
 
 
 \section{Previous Work}
-{\color{red} needs: \\
-works which used the pre-processing methods in question\\}\\
-% physionet and metaphysionet?
 \label{sec:prevwork}
 The SOTA benchmarks for the automatic classification of cardio-vascular diseases continually improve as more data sets become available and computation costs decrease. However, no consensus seems to exist on the best pre-processing steps for such datasets. 
 
-Here, we define pre-processing as \textit{``any function which aims to simplify or transform the data in-order to ameliorate the learning process"}. ~\cite{hong2022practical} highlight 4 common pre-processing methods for ECG signals, based on their analysis of entries to the Physionet2020 Challenge~\cite{goldberger2000physiobank,alday2020classification}: resizing, resampling, band-passing, and normalizing.
+Here, we define pre-processing as \textit{``any function which aims to simplify or transform the data in-order to enhance the performance outcomes and/or reduce training over-head"}. \citet{hong2022practical} highlight 4 common pre-processing methods for ECG signals, based on their analysis of entries to the Physionet2020 Challenge~\citep{goldberger2000physiobank,alday2020classification}: resizing, resampling, band-passing, and normalizing.
 
 \subsection{Resizing} 
-Signals are time-series, and time-series can vary in length. Resizing refers to having a fixed length for all signals. In this work, we do not explore various approaches to resizing, rather, we pad samples with zeros on the right, if the full size $x$ is lower than our desired fixed length. If $x$ is longer than the fixed length, then samples 0-$x$ are used. 
+Signals are time-series, and time-series vary in length. Resizing refers to assigning a fixed length (or window) to all signals. Here, we use a fixed window length for all experiments, and samples with zeros on the right, if the full size $x$ is lower than our desired fixed length. If $x$ is longer than the fixed length, then samples 0-$x$ are used. 
 \subsection{Resampling (down-sampling)}
 ECGs are typically sampled at the rate of 500Hz~\cite{luo2010review,uwaechia2021comprehensive}, meaning that each second of an ECG recording contains 500 samples. The act of downsampling an ECG is akin to resolution reduction of an image. This can drastically lower training times and hardware requirements, yet it is possible that important information could be lost. In this work we use the simple and commonly used nearest-neighbour interpolation~\cite{rukundo2012nearest} method to down-sample the ECGs, and measure the effect of different down-sampling rates on the performance of ML models. We discuss our findings in Section~\ref{sec:scaling}. 
 \subsection{Band-Passing}
@@ -282,7 +274,7 @@ st depression                &   869 \\
 \section{Experiment Methodology}
 \label{sec:experiment}
 
-In Section~\ref{sec:prevwork} we discussed common pre-processing functions, and how some SOTA classifiers have used one or more of these functions, while others have omitted them entirely as seen in Table~\ref{tab:top5} as well as works by~\cite{ribeiro2020automatic}{\color{red}(should put in more works here)}. We also discussed three SOTA architectures for time-series classification, and in Section~\ref{datasets}, we described the three datasets of multi-labeled ECGs that the models can learn from. ~\textit{Best practices for ECG pre-processing can be established if we see consistent patterns of improvement in performance scores when applying a pre-processing function to different datasets, and comparing the performances of the models}. \\
+In Section~\ref{sec:prevwork} we discussed common pre-processing functions, and how some SOTA classifiers have used one or more of these functions, while others have omitted them entirely as seen in Table~\ref{tab:top5} as well as works by~\cite{ribeiro2020automatic}{\color{red}(should put in more works here)}. We also discussed three SOTA architectures for time-series classification, and in Section~\ref{datasets}, we described the three datasets of multi-labeled ECGs that the models can learn from. ~\textit{Best practices for ECG pre-processing can be established if we see consistent patterns of improvement in performance scores when applying a pre-processing function to different datasets, and comparing the performances of the models}.
 
 To compare pre-processing methods, we apply the methods we want to compare to each dataset, and train models on the transformed datasets. We use the performance of the model to score and rank the pre-processing function. Given enough of these performance scores for the various models, datasets, and diseases, we use statistical tests such as Wilcoxon signed rank test and Kruskal-Wallis to determine whether the pre-processing method was a significant factor in the performance of the models. For example, we would have the CPSC dataset at various sampling rates: CPSC\_500Hz, CPSC\_250Hz, etc. For each version of the dataset (i.e, the dataset pre-processed using a different function), we train and test each model 20 times. For 20 rounds, the data is randomly split in 80/10/10 training/validation/testing sets. Each model is trained on the training set, at the end of each epoch the new weights are saved to disk if the model has improved its highest F1 score on the validation set. When no improvements in the F1 measure (on the validation set) is seen after 30 epochs, the training stops, and the highest scoring weights (based on validation set performance) are loaded in the model and the F1 score on the test set is saved as the performance score of the experiment. This means that for each dataset/pre-processing/model combination, we have 20 performance scores. 
 
@@ -292,7 +284,7 @@ In this case, we can use the Wilcoxon signed rank test to measure whether each m
 Another method for comparison of results is the Kruskal-Wallis test~\cite{kruskal1952use,ostertagova2014methodology}. This test measures whether the median of several sets are~\textit{different}. We use this test to determine whether the pre-processing method had any effect on the performance of models for each disease. Since we are comparing 3 different pre-processing methods for 20 different heart conditions, we use the Holm-Bonferroni correction~\cite{holm1979simple,abdi2010holm}, and divide our initial alpha of 0.05 by 60 (since we run 3*20 tests), which gives us the new alpha $\alpha^*=8.33e^{-4}$. We reject the null hypothesis (i.e, the pre-processing method has an effect on the outcome) if $p<\alpha^*$. We've provided the raw p-value results in Table~\ref{tab:kruskal_wallis}, such that less conservative means of determining pre-processing significance can be applied.
 
 
-\begin{table*}[tbp]
+\begin{table*}[!h]
 \floatconts
   {tab:kruskal_wallis}
   {\caption{Kruskal-Wallis P-Value for importance of factor in diagnosis of each disease }}
@@ -323,7 +315,7 @@ ventricular ectopics                 &  \textbf{4.02e-21}  & 2.357e-01 & 3.56e-0
         \end{tabular}
   }
 \end{table*}
-\begin{table*}[htbp]
+\begin{table*}[!h]
 \floatconts
   {tab:kr_all_conditions}
   {\caption{P-value for Kruskal-Wallis test across conditions. Do sampling rate, band-passing, normalizing, and model architecture affect the F1 result?}}
@@ -394,14 +386,16 @@ What we refer to as "normalization" is the transformation of an input signal---w
 By default, all our experiments have used this technique in the pre-preocessing chain. Here we ran our 3 models on the 3 datasets with no pre-processing, and compare the results to the models with only normalization applied (these would be the models from Section~\ref{sec:scaling} with the unmodified sampling rate of 500Hz). 
 
 \subsection{Normalization Results}
-The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} show normalization to be an important factor in the outcomes of 7 out of 20 diseases. To calculate the correlation values in Table~\ref{tab:corr}, we added a new label to the results by mapping raw, none-normalized ECGs to 0, and min-max normalized ECGs to 1. We then measure the correlation between F1 values and the normalization type. The correlation values have a slight negative bias, which indicates that in the cases where normalization type was important, more often than not models training on raw ECGs performed better. In addition, as shown in Table~\ref{tab:kr_all_conditions}, a small p-value of 0.0002 was measured by the Kruskal-Wallis test between F1 measures and the two normalization groups; this indicates that normalization (or lack thereof) played an important role in the performance of the models. 
+The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} show normalization to be an important factor in the outcomes of 7 out of 20 diseases. To calculate the correlation values between F1 values and the normalization type in Table~\ref{tab:corr}, we mapped the label of raw datasets to 0, and min-max normalized datasets to 1. The correlation values have a slight negative bias, which indicates that in the cases where normalization type was important, more often than not models training on raw ECGs performed better. In addition, as shown in Table~\ref{tab:kr_all_conditions}, a small p-value of 0.0002 was measured by the Kruskal-Wallis test between F1 measures and the two normalization groups; this indicates that normalization (or lack thereof) played an important role in the performance of the models. 
 
 \textbf{Main Takeaway} Surprisingly, Min-Max normalization has a slight negative impact on the performance relative to raw ECGs. However, min-max normalization one
 of multiple common normalization methods used for time-series classification~\cite{uwaechia2021comprehensive}, therefore we cannot discourage the use of all normalization methods. However, these results show that although normalization is a staple pre-processing method in some fields of deep-learning, we cannot presume its effectiveness for the task of ECG classification.
 
 
 \section{Discussion}
-We found no consistency in the pre-processing methods used in recent research on the detection of cardiovascular conditions using ECG signals. To address this gap in knowledge, we trained 3 different time-series classifiers on 3 open datasets of ECGs in order to examine the effect of 3 popular pre-processing methods. Our findings suggest that the performance of different pre-processing and architecture combinations varies depending on the condition of interest. This would explain the lack of consistency in previous works, which may be looking at different datasets, using different label weights, or looking at different performance measures. 
+Prior to this work, we found no consistency in the pre-processing methods used in recent research on the detection of cardiovascular conditions using ECG signals. To address this gap in knowledge, we trained 3 different time-series classifiers on 3 open datasets of ECGs in order to examine the effect of 3 popular pre-processing methods. Our findings suggest that the performance of different pre-processing and architecture combinations varies depending on the condition of interest. This would explain the lack of consistency in previous works, which may be looking at different datasets, using different label weights, or looking at different performance measures. 
+
+We found rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates can significantly reduce time and hardware requirements for training models. We also found min-max normalization to be slightly detrimental, and band-passing to make no measurable difference in model performance.
 
 Many recent works have highlighted the effectiveness of an ensemble method using various architectures relative to any single model ~\cite{uwaechia2021comprehensive,hong2022practical,IsmailFawaz2018deep,strodthoff2020deep,chen2020detection}. Our findings here suggest that use of various architectures \textit{as well} as different pre-processing methods could yield slight improvements in SOTA benchmarks. However, taking such an approach would be brute-forcing the problem, rather than solving it. 
 
