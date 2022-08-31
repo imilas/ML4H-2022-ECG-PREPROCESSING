@@ -78,10 +78,10 @@
 % \Name{others} \Email{CVC@ualberta.ca}\\
 % \addr University of Alberta}}
 
-\author{\Name{author first} \Email{{author1@email}\\
-\Name{author second} \Email{author2@email}\\
-\Name{Others} \Email{others@email}\\
-\addr Author Address}}
+% \author{\Name{author first} \Email{{author1@email}\\
+% \Name{author second} \Email{author2@email}\\
+% \Name{Others} \Email{others@email}\\
+% \addr Author Address}}
 
 
 
@@ -162,8 +162,8 @@ There is also a great variety in the architectures used to learn from ECG datase
 We conduct our experiments on three datasets, the~\textbf{CPSC} dataset~\citep{liu2018open}, \textbf{Chapman-Shaoxing} dataset~\citep{zheng202012}, and ~\textbf{PTB-XL}~\citep{wagner2020ptb}. The datasets are all multi-label, and recorded at the sampling rate of 500Hz. All have been released as part of the 8 datasets of labeled 12-lead ECGs provided by the Physionet\-2021 challenge~\citep{reyna2021will,reyna4issues}.
 To simplify our datasets and experiments, we only use the labels which appear in more than 5\% of the ECGs in each dataset. Here we only use 10 seconds of data from each ECG. ECGs shorter than this length are right padded with zeros, therefore we can represent each ECG as a matrix with dimensions of 12x5000 (before down-sampling).
 The breakdown of these datasets and their label counts after our modifications are given in Tables~\ref{tab:cpsc},~\ref{tab:chapman}, and~\ref{tab:ptb}.
-\begin{table}[tbp]
 
+\begin{table}[htbp]
 \floatconts
   {tab:cpsc}%
   {\caption{Modified CPSC Dataset}}%
@@ -186,7 +186,12 @@ st depression                &   869 \\
   }
 \end{table}
 
-\begin{table}[tbp]
+
+
+\textbf{CPSC:} Released in 2018 as part a multi-label ECG classification competition~\citep{liu2018open} and used in recent benchmarks~\citep{strodthoff2020deep}. ECG signal duration in this dataset is between 6 and 60 seconds, with an average duration of 15.79 seconds. Originally, this dataset has 9 labels, reduced to 7 for our work.
+
+\textbf{Chapman-Shaoxing:} Has not been subject to many benchmarks. This dataset contains 10,646 12-lead ECGs, originally with 11 labels, reduced to 8 in our work~\citep{zheng202012}.
+\begin{table}[htbp]
  % The first argument is the label.
  % The caption goes in the second argument, and the table contents
  % go in the third argument.
@@ -213,17 +218,8 @@ st depression                &   869 \\
   }
 \end{table}
 
-\textbf{CPSC:} Released in 2018 as part a multi-label ECG classification competition~\citep{liu2018open} and used in recent benchmarks~\citep{strodthoff2020deep}. ECG signal duration in this dataset is between 6 and 60 seconds, with an average duration of 15.79 seconds. Originally, this dataset has 9 labels, reduced to 7 for our work.
-
-\textbf{Chapman-Shaoxing:} Has not been subject to many benchmarks. This dataset contains 10,646 12-lead ECGs, originally with 11 labels, reduced to 8 in our work~\citep{zheng202012}.
-
 \textbf{PTB-XL:} Used in recent benchmarks~\citep{strodthoff2020deep}, this dataset contains 21,837 12-lead ECGs~\citep{wagner2020ptb}. The original dataset has 54 labels, reduced to 11 in our work. 
-
-
-
-
-
-\begin{table}[tbp]
+\begin{table}[htbp]
 
 \floatconts
   {tab:ptb}%
@@ -255,10 +251,10 @@ st depression                &   869 \\
 \begin{figure*}[!ht]
 \floatconts
   {fig:scaling_results_per_disease}
-  {\vspace*{-10mm}\caption{Performance of the models disease at varying scaling rates. The 15 models are ranked against each other, higher MRR means better relative performance}}
+  {\vspace*{-10mm}\caption{Performance of the models for each disease at varying scaling rates. The 15 models are ranked against each other, higher MRR means better relative performance}}
   {
-  \resizebox{1.2\linewidth}{!}{\includegraphics{images/Per-Disease_Model_Performance_all (1).pdf}}
-  }\vspace{-8mm}
+  \resizebox{1.1\linewidth}{!}{\hspace*{-50mm}\includegraphics{images/Per-Disease_Model_Performance_all (1).pdf}}
+  }\vspace{-7mm}
 \end{figure*}
 
 \section{Experiment Methodology}
@@ -335,7 +331,7 @@ We also show the Spearman correlation between sampling rate and performance in T
   {\caption{Higher sampling rates required more training VRAM (in Gigabytes). Relative ratios should be considered, since absolute values are affected by window size, precision, batch size, etc.}}
   {\begin{tabular}{|c|c|c|c|}
   \hline
-    \bfseries Hz & \bfseries inception & \bfseries xresent1d & \bfseries minirocket\\
+    \bfseries Hz & \bfseries inception & \bfseries xresent1d & \bfseries rocket\\
   \hline
     50  & 1.8       & 3.2     & 1.5    \\
     % 125 & 2.6       & 5.7     & 1.9    \\
@@ -387,7 +383,7 @@ What we refer to as "normalization" is the transformation of an input signal---w
 Here we ran the models an the datasets with no pre-processing, and compare the results to the models with only normalization applied.
 
 \subsection{Normalization Results}
-P-values in Table~\ref{tab:kruskal_wallis} show normalization to be an important factor for 7 out of 20 diseases. To calculate the correlation values between F1 and the normalization type in Table~\ref{tab:corr}, we mapped the label of raw datasets to 0, and min-maxed datasets to 1. The correlation values have a slight negative bias, indicating that when normalization was important, more often than not models training on raw ECGs performed better. In addition, as shown in Table~\ref{tab:kr_all_conditions}, a small p-value of 0.0002 was measured by the Kruskal-Wallis test between F1 measures and the two normalization groups; this indicates that normalization (or lack thereof) was overall an important factor.
+P-values in Table~\ref{tab:kruskal_wallis} show normalization to be an important factor for 7 out of 20 diseases. For example, ``left ventricular high voltage" and ``left ventricular hypertrophy" performed better without normalization in all 3 models. To calculate the correlation values between F1 and the normalization type in Table~\ref{tab:corr}, we mapped the label of raw datasets to 0, and min-maxed datasets to 1. The correlation values have a slight negative bias, indicating that when normalization was important, more often than not models training on raw ECGs performed better. In addition, as shown in Table~\ref{tab:kr_all_conditions}, a small p-value of 0.0002 was measured by the Kruskal-Wallis test between F1 measures and the two normalization groups; this indicates that normalization (or lack thereof) was overall an important factor.
 
 \textbf{Main Takeaway} Surprisingly, Min-Max normalization has a slight negative impact on the performance relative to raw ECGs. We cannot discourage the use of all normalization methods as it is only one of the common normalization methods used \citep{uwaechia2021comprehensive}. However, these results indicate that staple pre-processing methods in other fields of deep-learning cannot be presumed effective for ECG classification.
 
@@ -402,48 +398,55 @@ Many recent works have noted the effectiveness of an  ensemble of various archit
 
 \bibliography{pmlr-sample}
 
-\appendix
+% \appendix
+% \section{Comparing MMR Performance of Models}
 
-\section{Comparing Models To Eachother}
-\label{apd:model_vs_model}
-\begin{figure*}[htbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Model performance comparison for all datasets. Best models (those with the lowest average ranking) are higher on the y-axis.}}
-  {\includegraphics[width=1\linewidth]{images/model_comparisons_alldatasets.pdf}}
+% \label{apd:per_disease_graphs}
+
+
+
+% \section{Comparing Models To Each other}
+% \label{apd:model_vs_model}
+
+
+% \begin{figure*}[htbp]
+%  % Caption and label go in the first argument and the figure contents
+%  % go in the second argument
+% \floatconts
+%   {fig:image}
+%   {\caption{Model performance comparison for all datasets. Best models (those with the lowest average ranking) are higher on the y-axis.}}
+%   {\includegraphics[width=1\linewidth]{images/model_comparisons_alldatasets.pdf}}
  
-\end{figure*}
+% \end{figure*}
 
-\begin{figure*}[htbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Model performance comparison for CPSC}}
-  {\includegraphics[width=1\linewidth]{images/model_comparisons_CPSC2018.pdf}}
+% \begin{figure*}[htbp]
+%  % Caption and label go in the first argument and the figure contents
+%  % go in the second argument
+% \floatconts
+%   {fig:image}
+%   {\caption{Model performance comparison for CPSC}}
+%   {\includegraphics[width=1\linewidth]{images/model_comparisons_CPSC2018.pdf}}
  
-\end{figure*}
+% \end{figure*}
 
-\begin{figure*}[htbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Model performance comparison for Chapman}}
-  {\includegraphics[width=1\linewidth]{images/model_comparisons_ChapmanShaoxing.pdf}}
+% \begin{figure*}[htbp]
+%  % Caption and label go in the first argument and the figure contents
+%  % go in the second argument
+% \floatconts
+%   {fig:image}
+%   {\caption{Model performance comparison for Chapman}}
+%   {\includegraphics[width=1\linewidth]{images/model_comparisons_ChapmanShaoxing.pdf}}
  
-\end{figure*}
+% \end{figure*}
 
-\begin{figure*}[htbp]
- % Caption and label go in the first argument and the figure contents
- % go in the second argument
-\floatconts
-  {fig:image}
-  {\caption{Model performance comparison for PTBXL}}
-  {\includegraphics[width=1\linewidth]{images/model_comparisons_PTBXL.pdf}}
+% \begin{figure*}[htbp]
+%  % Caption and label go in the first argument and the figure contents
+%  % go in the second argument
+% \floatconts
+%   {fig:image}
+%   {\caption{Model performance comparison for PTBXL}}
+%   {\includegraphics[width=1\linewidth]{images/model_comparisons_PTBXL.pdf}}
  
-\end{figure*}
-
+% \end{figure*}
+\let\clearpage\relax
 \end{document}
