@@ -248,10 +248,10 @@ st depression                &   869 \\
 \begin{figure*}[!ht]
 \floatconts
   {fig:scaling_results_per_disease}
-  {\caption{Performance of the models disease at varying scaling rates. The 15 models are ranked against each other, higher MRR means better relative performance}}
+  {\vspace*{-10mm}\caption{Performance of the models disease at varying scaling rates. The 15 models are ranked against each other, higher MRR means better relative performance}}
   {
   \resizebox{1.2\linewidth}{!}{\includegraphics{images/Per-Disease_Model_Performance_all (1).pdf}}
-  }
+  }\vspace{-8mm}
 \end{figure*}
 
 \section{Experiment Methodology}
@@ -338,14 +338,10 @@ We also show the Spearman correlation between sampling rate and performance in T
   MiniRocket &  2.70e-02 & -1.21e-02  \\
   xresnet    & 5.17e-02 & -9.50e-02 \\
   \hline
-  All Models & 8.00e-3 & -7.41e-02\\
+  All Models & 8.00e-03 & -7.41e-02\\
   \hline
   \end{tabular}}
 \end{table}
-
-
-
-
 
 \section{Band-Pass Filtering}
 \label{sec:BandPass}
@@ -357,8 +353,6 @@ In Section~\ref{sec_ds_results}, we discussed how down-sampling does not appear 
 The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} do not indicate a difference between the performance of the 4 model groups in question (models trained using the 3 different band-passing functions, and models trained on the raw data). This is an interesting result which may explain the lack of consistency in the application of signal filtering in SOTA ECG classification works. In addition, as shown in Table~\ref{tab:kr_all_conditions}, a p-value of 0.904 was measured by the Kruskal-Wallis test between F1 measures and different band-passing methods when considering all diseases. 
 \\
 \textbf{Main Takeaway:} When training on multiple labels from large, carefully curated datasets of ECGs, band-passing is not a necessary step. Band-pass filtering does not hurt the final outcomes, and can be applied at the GPU level with low overhead. Therefore in most situations, particularly when dealing with potentially noisy data (for example, where DC offset may not have been removed prior), it is advisable to use filtering. We cannot make any concrete statements about best cut-off frequencies, as it likely varies based on the recording hardware used and the cardio-vascular conditions being diagnosed. 
-
-
 
 \section{Normalization}
 \label{sec:Norm}
