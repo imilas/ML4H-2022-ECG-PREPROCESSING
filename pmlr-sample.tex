@@ -106,9 +106,9 @@ electrocardiogram, machine learning, signal processing
 \label{sec:intro}
 We focus on the Electrocardiogram (ECG) pre-processing decisions faced by researchers working towards automatic classification of cardiovascular conditions. The ever-growing number of tools and approaches available for machine learning often require a number of a priori guesses to be made by those who process the training data and design the architectures. The task of training models which predict heart disease is no exception.
 
-Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system~\citep{maleki2014use,uwaechia2021comprehensive}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\citep{reyna2021will,reyna4issues,ribeiro2020automatic,chen2020detection,zhao2020adaptive}. However, training such models requires a large amount of data~\citep{reyna2021will,reyna4issues,zhao2020adaptive}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, data augmentation) can be critical for both the model's performance as well as the amount of time and hardware required. 
+Routinely utilized by clinicians for diagnoses of cardiovascular abnormalities, an ECG is a recording of the electrical activity of the cardiovascular system~\citep{maleki2014use,uwaechia2021comprehensive}. In recent years, machine learning models have achieved remarkable results in automatic diagnosis of some heart conditions when trained with enough labeled ECG data~\citep{reyna2021will,reyna4issues,ribeiro2020automatic,chen2020detection,zhao2020adaptive}. However, training such models requires a large amount of data~\citep{reyna2021will,reyna4issues,zhao2020adaptive}, where decisions regarding how the data is pre-processed (e.g., filtering, scaling, data augmentation) can be critical for the model's performance, hardware requirements, and training time.
 
- Pre-processing functions are transformations applied to signals--ECGs, in this case---in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\citep{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork}, the variety of approaches in past works makes finding a trend between pre-processing functions used and performance results not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes) it is best to consider multiple datasets, architectures, and heart conditions.  
+ Pre-processing functions are transformations applied to signals---ECGs, in this case---in order to reduce noise and simplify the learning task. Previous works utilize a diverse range of pre-processing functions, datasets, and architectures, often with great results~\citep{hong2022practical}. As we will discuss in Section~\ref{sec:prevwork}, the variety of approaches in past works makes finding a trend between the pre-processing functions used and performance results not feasible. We believe that in order to make claims about the viability of ECG pre-processing methods (that is, whether they result in better outcomes) it is best to consider multiple datasets, architectures, and heart conditions.  
 
 
 Here, we aim to simplify this decision space for other researchers by testing the effect of \textit{down-sampling}, \textit{band-passing}, and \textit{normalization} on the outcome of 3 different cutting-edge multi-label classifiers for time-series when trained on 3 different ECG datasets. We show that down-sampling from the standard recording rate of 500Hz can significantly reduce training times and hardware requirements, without being detrimental to model performance.  We found min-max normalization to be slightly detrimental overall, and band-passing to make no measurable difference. In Section~\ref{sec:experiment} we discuss the experiment setup and performance measures, and discuss the results of down-sampling, band-passing, and normalization in Sections~\ref{sec:scaling},~\ref{sec:BandPass}, and~\ref{sec:Norm}. 
@@ -147,13 +147,13 @@ Signals are time-series, and time-series vary in length. Resizing refers to assi
 ECGs are typically sampled at the rate of 500Hz~\citep{luo2010review,uwaechia2021comprehensive}, meaning that each second of an ECG recording contains 500 samples. Down-sampling an ECG is often no different than resolution reduction of an image. Since a lower sampling rate leads to smaller data, it can often drastically lower training times and hardware requirements, but important information may be lost. In this work we use the simple and commonly used nearest-neighbour interpolation~\citep{rukundo2012nearest} method to measure the effect of different sampling rates on the performance of ML models. We discuss our findings with regards to performance and model sizes in Section~\ref{sec:scaling}. 
 
 \textbf{Band-Passing:}
-Many sources can introduce noise to ECG signals. Powerlines are a common source~\citep{uwaechia2021comprehensive}, which depending on the regional infrastructure can introduce noise at various frequencies. It is common for ECG recording hardware to use built-in band rejection (or notch filters) to deal with such issues, and many ECG libraries apply notch filters to ECGs for this reason~\citep{Makowski2021neurokit}. However, there are other unaccounted sources of noise which need to be dealt with at the software level. In signal processing, a band-pass filter is used for the removal of frequencies outside of a given range (or cut-offs)~\citep{lyons1997understanding}; all frequencies below the high-pass cut-off and above the low-pass cut-off are removed or reduced. This can improve performance as noise can interfere with the learning process. In this work we compare the use of different cut-offs as well as the case when no filtering was applied to the dataset. The results are shown in Section~\ref{sec:BandPass}. 
+Many sources can introduce noise to ECG signals. Powerlines are a common example~\citep{uwaechia2021comprehensive}, which depending on the regional infrastructure can introduce noise at various frequencies. It is common for ECG recording hardware to use built-in band rejection (or notch filters) to deal with such issues, and many ECG libraries apply notch filters to ECGs for this reason~\citep{Makowski2021neurokit}. However, there are other unaccounted sources of noise which need to be dealt with at the software level. In signal processing, a band-pass filter is used for the removal of frequencies outside of a given range (or cut-offs)~\citep{lyons1997understanding}; all frequencies below the high-pass cut-off and above the low-pass cut-off are removed or reduced. This can improve performance as noise can interfere with the learning process. In this work we compare the use of different cut-offs as well as the case when no filtering was applied to the dataset. The results are shown in Section~\ref{sec:BandPass}. 
 
 \textbf{Normalizing:}
-Normalization of input values has been shown to produce better or equal value results in image and time-series classification~\citep{bhanja2018impact}. Particularly in the case of ECGs, there can be differences in recorded amplitudes depending on the equipment used~\citep{uwaechia2021comprehensive}, making normalization a logical step in pre-processing. Here we use the min-max normalization method to the case when no normalization was applied. We show the results in Section~\ref{sec:Norm}
+Normalization of input values has been shown to produce better or equal value results in image and time-series classification~\citep{bhanja2018impact}. Particularly in the case of ECGs, there can be differences in recorded amplitudes depending on the equipment used~\citep{uwaechia2021comprehensive}, making normalization a logical step in pre-processing. Here we compare the performance of min-max normalization to raw ECGs and show the results in Section~\ref{sec:Norm}.
 
 \section{Models}
-There is also a great variety in the architectures used to learn from ECG datasets, or time-series data more generally. Here, we use three models with proven results in state of the art time-series classification tasks. The \textbf{Inception-Time Network}, which is the 1-dimensional application of the Inception-Network~\citep{szegedy2017inception,ismail2020inceptiontime} and \textbf{MiniRocket}, a quick and mostly deterministic feature extractor for time-series~\citep{dempster2021minirocket}. A recent survey of time-series classification methods by~\cite{ruiz2021great} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In addition, Inception-Time has excelled in ECG classification benchmarks~\citep{Strodthoff2021}. The third architecture tested here is \textbf{xresnet1d101}, a resnet model for time-series which was found to be the overall best performer in a recent benchmark study of best architectures for classification of ECGs by~\citet{strodthoff2020deep}.
+There is a large variety in the architectures used to learn from ECG datasets, or time-series data more generally. Here, we use three models with proven results in state of the art time-series classification benchmarks, implemented by the TSAI library~\cite{tsai}. The \textbf{Inception-Time Network}, which is the 1-dimensional application of the Inception-Network~\citep{szegedy2017inception,ismail2020inceptiontime} and \textbf{MiniRocket}, a quick and mostly deterministic feature extractor for time-series~\citep{dempster2021minirocket}. A recent survey of time-series classification methods by~\cite{ruiz2021great} highlights both of these models as excellent performers in various multi-variable time-series classification benchmarks. In addition, Inception-Time has excelled in ECG classification benchmarks~\citep{Strodthoff2021}. The third architecture tested here is \textbf{xresnet1d101}, a resnet model for time-series which was found to be the overall best performer in a recent benchmark study of best architectures for classification of ECGs by~\citet{strodthoff2020deep}.
 
 
 \section{Datasets}
@@ -168,7 +168,7 @@ The breakdown of these datasets and their label counts after our modifications a
   {tab:cpsc}%
   {\caption{Modified CPSC Dataset}}%
   {
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|r|}
  \hline
 Label & Count \\
  \hline
@@ -199,7 +199,7 @@ st depression                &   869 \\
   {tab:chapman}%
   {\caption{Modified Chapman Dataset}}%
   {
-    \begin{tabular}{|c|c|}
+    \begin{tabular}{|c|r|}
      \hline
     Label & Count \\
      \hline
@@ -225,7 +225,7 @@ st depression                &   869 \\
   {tab:ptb}%
   {\caption{Modified PTB-XL}}%
   {
-    \begin{tabular}{|c|c|}
+    \begin{tabular}{|c|r|}
      \hline
     Label & Count \\
      \hline
@@ -275,9 +275,9 @@ Another method for comparison of results is the Kruskal-Wallis test~\citep{krusk
   {tab:kruskal_wallis}
   {\caption{Kruskal-Wallis P-Value for importance of factor in diagnosis of each disease }}
   {
-        \begin{tabular}{|l|l|l|l|}
+        \begin{tabular}{|l|r|r|r|}
         \hline
-        Label / Heart Condition &             Sampling Rate & Bandpassing & Normalizing\\\hline
+        Label / Heart Condition &             Sampling Rate & Bandpass & Normalizing\\\hline
 1st degree av block                  &  3.50e-02  & 2.128e-01 & 2.74e-01  \\
 abnormal QRS                         &  \textbf{3.56e-08}  & 7.514e-01 & \textbf{2.41e-08} \\
 atrial fibrillation                  &  \textbf{6.53e-04}  & 9.828e-02 & 4.14e-03   \\
@@ -305,7 +305,7 @@ ventricular ectopics                 &  \textbf{4.02e-21}  & 2.357e-01 & 3.56e-0
 \floatconts
   {tab:kr_all_conditions}
   {\caption{P-value for Kruskal-Wallis test across conditions. Do sampling rate, band-passing, normalizing, and model architecture affect the F1 result?}}
-  {\vspace{-6mm}\begin{tabular}{|c|c|c|c|}
+  {\vspace{-6mm}\begin{tabular}{|r|r|r|r|}
   \hline
     \bfseries Sampling Rate & \bfseries Band-passing & \bfseries Normalization & \bfseries Model \\
   \hline
@@ -329,7 +329,7 @@ We also show the Spearman correlation between sampling rate and performance in T
 \floatconts
   {tab:vram}
   {\caption{Higher sampling rates required more training VRAM (in Gigabytes). Relative ratios should be considered, since absolute values are affected by window size, precision, batch size, etc.}}
-  {\begin{tabular}{|c|c|c|c|}
+  {\begin{tabular}{|r|r|r|r|}
   \hline
     \bfseries Hz & \bfseries inception & \bfseries xresent1d & \bfseries rocket\\
   \hline
@@ -363,7 +363,7 @@ We also show the Spearman correlation between sampling rate and performance in T
   \end{tabular}\vspace*{-1mm}}
 \end{table}
 
-\section{Band-Pass Filtering}
+\vspace{-5mm}\section{Band-Pass Filtering}
 \label{sec:BandPass}
 A band-pass filter removes all frequencies outside its range, which can be an effective noise removal technique. The band-pass filter range applied to ECG data varies greatly in past works. Typically, the high-pass filter takes on a value of 0.05-1Hz, and the low-pass filter is applied somewhere between 30-150Hz~\citep{uwaechia2021comprehensive,luo2010review}. Is there an ``optimal" range for a band-pass filter in this context? Is band-pass filtering even necessary when using large datasets and large deep learning models?
 
@@ -374,14 +374,14 @@ The Kruskal-Wallis results in Table~\ref{tab:kruskal_wallis} do not indicate a d
 \\
 \textbf{Main Takeaway:} When training on multiple labels from large, carefully curated datasets of ECGs, band-passing is not a necessary step. Band-pass filtering does not hurt the final outcomes, and can be applied at the GPU level with low overhead. Therefore in most situations, particularly when dealing with potentially noisy data (for example, where DC offset may not have been removed prior), it is advisable to use filtering. We cannot make any concrete statements about best cut-off frequencies, as it likely varies based on the recording hardware used and the cardio-vascular conditions being diagnosed. 
 
-\section{Normalization}
+\vspace{-5mm}\section{Normalization}
 \label{sec:Norm}
 What we refer to as "normalization" is the transformation of an input signal---which in this case is an ECG---to a distribution of values in the range of [0,1]~\citep{hong2022practical}. Here we use the ``Min-Max" normalization method, a commonly used pre-processing technique for ECG signals~\citep{uwaechia2021comprehensive,li2010robust,li2019identifying,fang2009human}. This technique uses the following formula where $Y[n]$ is the new amplitude for time-step $n$, $X[n]$ is the old amplitude, $min$ is the minimum value for $X[n]$, and $max$ is the maximum value for $X[n]$ \citep{uwaechia2021comprehensive}.
 
-\[ Y[n] = \frac{x[n]-min}{max-min} \]
+\vspace{-3mm}\[ Y[n] = \frac{x[n]-min}{max-min} \]
 
 Here we ran the models an the datasets with no pre-processing, and compare the results to the models with only normalization applied.
-
+\vspace{-2mm}
 \subsection{Normalization Results}
 P-values in Table~\ref{tab:kruskal_wallis} show normalization to be an important factor for 7 out of 20 diseases. For example, ``left ventricular high voltage" and ``left ventricular hypertrophy" performed better without normalization in all 3 models. To calculate the correlation values between F1 and the normalization type in Table~\ref{tab:corr}, we mapped the label of raw datasets to 0, and min-maxed datasets to 1. The correlation values have a slight negative bias, indicating that when normalization was important, more often than not models training on raw ECGs performed better. In addition, as shown in Table~\ref{tab:kr_all_conditions}, a small p-value of 0.0002 was measured by the Kruskal-Wallis test between F1 measures and the two normalization groups; this indicates that normalization (or lack thereof) was overall an important factor.
 
@@ -390,12 +390,13 @@ P-values in Table~\ref{tab:kruskal_wallis} show normalization to be an important
 \section{Discussion}
 Prior to this work, we found no consistency in the pre-processing methods used in classification of cardiovascular conditions using ECG. To address this gap, we trained 3 different classifiers on 3 datasets of ECGs and examined the effect of 3 pre-processing methods. Our findings suggest that the performance of different pre-processing and architecture combinations varies depending on the condition of interest. This would explain the lack of consistency in previous works, where datasets, label weights, and performance measures vary. 
 
-We found rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates can significantly reduce time and hardware requirements for training models. We also found min-max normalization to be slightly detrimental, and band-passing to make no measurable difference in model performance.
+We found rates as low as 50Hz can yield comparable if not better results than the commonly used 500Hz sampling rate. This is significant as smaller sampling rates can drastically reduce time and hardware requirements for training models. We also found min-max normalization to be slightly detrimental, and band-passing to make no measurable difference in model performance.
 
 Here, we ignored the possible interdependence between pre-processing methods. An approach which considers the \textit{sequence} in which the methods are applied would exponentially increase the---already costly---time and hardware requirements for this work. Additionally, past works rarely discuss the sequencing in which their pre-processing methods were applied. 
 
 Many recent works have noted the higher accuracy of an ensemble model with various architectures relative to any single model ~\citep{uwaechia2021comprehensive,hong2022practical,IsmailFawaz2018deep,strodthoff2020deep,chen2020detection}. Our findings here suggest that the use of various architectures \textit{as well} as different pre-processing methods could yield slight improvements in benchmarks. However, taking such an approach would be brute-forcing the problem, rather than solving it. 
 
+\textbf{Acknowledgements}: This work has been funded by the \censor{Canadian Institutes of Health Research} and \censor{the Heart and Stroke Foundation of Canada.}
 \bibliography{pmlr-sample}
 
 % \appendix
